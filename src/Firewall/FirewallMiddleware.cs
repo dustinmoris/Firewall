@@ -78,19 +78,15 @@ namespace Firewall
                     || IsVip(remoteIpAddress)
                     || IsInvitedGuest(remoteIpAddress))
                 ? _next.Invoke(context)
-                : DenyAccess(context);
+                : DenyAccess(remoteIpAddress, context);
         }
 
         private bool IsVip(IPAddress remoteAddress)
         {
             if (_vipList != null && _vipList.Count > 0)
-            {
-                foreach(var ip in _vipList)
-                {
+                foreach (var ip in _vipList)
                     if (ip.IsEqualTo(remoteAddress))
                         return true;
-                }
-            }
 
             return false;
         }
@@ -98,19 +94,21 @@ namespace Firewall
         private bool IsInvitedGuest(IPAddress remoteAddress)
         {
             if (_guestList != null && _guestList.Count > 0)
-            {
-                foreach(var cidr in _guestList)
-                {
+                foreach (var cidr in _guestList)
                     if (cidr.Contains(remoteAddress))
                         return true;
-                }
-            }
 
             return false;
         }
 
-        private Task DenyAccess(HttpContext context)
+        private Task DenyAccess(IPAddress address, HttpContext context)
         {
+            if (_logger != null)
+                _logger.LogWarning(
+                    "Firewall blocked an unauthorized IP Address '{address}' trying to access '{path}'.",
+                    address,
+                    context.Request.Path);
+
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return context.Response.WriteAsync("You're not authorized to access this resource.");
         }

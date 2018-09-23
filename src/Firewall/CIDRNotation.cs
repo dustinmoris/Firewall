@@ -52,20 +52,17 @@ namespace Firewall
         /// <summary>
         /// Checks if an <paramref name="address"/> is within the address space defined by this CIDR notation.
         /// </summary>
-        public bool Contains(IPAddress address)
-        {
-            var cidrBytes = this.Address.GetAddressBytes();
-            var addressBytes = address.GetMappedAddressBytes();
+        public bool Contains(IPAddress address) =>
+            CompareAddressBytes(
+                this.Address.GetAddressBytes(),
+                address.GetMappedAddressBytes(),
+                this.MaskBits);
 
-            return
-                cidrBytes.Length == addressBytes.Length
-                && CompareAddressBytes(addressBytes, cidrBytes, this.MaskBits);
-        }
-
-        private static bool CompareAddressBytes(byte[] address, byte[] cidr, int maskBits)
+        private static bool CompareAddressBytes(byte[] cidr, byte[] address, int bits)
         {
+            if (cidr.Length != address.Length) return false;
+
             var index = 0;
-            var bits = maskBits;
 
             for (; bits >= 8; bits -= 8)
             {
