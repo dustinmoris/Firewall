@@ -75,7 +75,7 @@ namespace Firewall
         {
             var vips = new List<IPAddress>();
             var guests = new List<CIDRNotation>();
-            var lines = response.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = response.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach(var line in lines)
             {
