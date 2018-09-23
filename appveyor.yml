@@ -1,0 +1,26 @@
+version: 0.1.0-{build}
+image: Visual Studio 2017
+environment:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+init:
+  - git config --global core.autocrlf true
+install:
+  - ps: .\.psscripts\install-dotnet.ps1
+build: off
+build_script:
+  - ps: .\build.ps1 -Release -Pack
+test: off
+artifacts:
+  - path: '**\Firewall.*.nupkg'
+    name: Firewall NuGet packages
+nuget:
+  account_feed: false
+  project_feed: true
+deploy:
+  provider: NuGet
+  api_key:
+    secure: +XDgIu4Tmln7LKedNmQgMFnyKTxxuCKFRK3V5oKEfwZiakPXRd5C7OueEGBL50oh
+  skip_symbols: false
+  artifact: /.*\.nupkg/
+  on:
+    appveyor_repo_tag: true
