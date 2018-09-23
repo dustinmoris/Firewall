@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- General -->
     <AssemblyName>Firewall</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-alpha-001</Version>
     <Description>An ASP.NET Core middleware for filtering IP addresses.</Description>
     <Copyright>Copyright 2018 Dustin Moris Gorski</Copyright>
     <Authors>Dustin Moris Gorski and contributors</Authors>
@@ -20,7 +20,7 @@
     <PackageId>Firewall</PackageId>
     <PackageTags>Firewall;IP Address;Filter;Security;ASP.NET Core</PackageTags>
     <PackageReleaseNotes>https://raw.githubusercontent.com/dustinmoris/Firewall/master/RELEASE_NOTES.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/dustinmoris/Firewall/master/Firewall-64x64.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/dustinmoris/Firewall/master/firewall.svg</PackageIconUrl>
     <PackageProjectUrl>https://github.com/dustinmoris/Firewall</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/dustinmoris/Firewall/master/LICENSE</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
