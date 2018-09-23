@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Firewall
 {
@@ -34,8 +35,9 @@ namespace Firewall
                 throw new ArgumentException($"Invlaid address in CIDR notation: {cidrNotation}.");
 
             var maskBits = Convert.ToInt32(parts[1], 10);
+            var maxMaskBit = address.AddressFamily == AddressFamily.InterNetwork ? 32 : 128;
 
-            if (maskBits < 0 || maskBits > 32)
+            if (maskBits < 0 || maskBits > maxMaskBit)
                 throw new ArgumentException($"Invalid bits in CIDR notation: {maskBits}.");
 
             Address = address;
