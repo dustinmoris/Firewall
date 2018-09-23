@@ -1,65 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
 using Firewall;
-using Microsoft.AspNetCore.Http;
 using Xunit;
-
-public class FirewallMiddlewareTests
-{
-    [Fact]
-    public async Task Firewall_With_Single_VIP_And_Request_With_Valid_IP_Returns_Success()
-    {
-        var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("12.34.56.78");
-        var vipList = new List<IPAddress> { allowedIpAddress };
-        var firewall = new FirewallMiddleware(
-            async (innerCtx) =>
-                {
-                    isSuccess = true;
-                    await innerCtx.Response.WriteAsync("Success!");
-                },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: null,
-            logger: null);
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = allowedIpAddress;
-
-        await firewall.Invoke(httpContext);
-
-        Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
-        Assert.True(isSuccess);
-    }
-
-    [Fact]
-    public async Task Firewall_With_Single_VIP_And_Request_With_Invalid_IP_Returns_AccessDenied()
-    {
-        var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("12.34.56.78");
-        var vipList = new List<IPAddress> { allowedIpAddress };
-        var firewall = new FirewallMiddleware(
-            async (innerCtx) =>
-                {
-                    isSuccess = true;
-                    await innerCtx.Response.WriteAsync("Success!");
-                },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: null,
-            logger: null);
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = IPAddress.Parse("10.99.99.99");
-
-        await firewall.Invoke(httpContext);
-
-        Assert.Equal(StatusCodes.Status403Forbidden, httpContext.Response.StatusCode);
-        Assert.False(isSuccess);
-    }
-}
 
 public class CIDRNotationTests
 {
