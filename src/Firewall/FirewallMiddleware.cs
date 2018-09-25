@@ -9,7 +9,7 @@ namespace Firewall
 {
     /// <summary>
     /// An ASP.NET Core middlware for IP address filtering.
-    /// <para>Firewall checks the IP address of an incoming HTTP request and validates it against a list of single IP addresses or CIDR notations.</para>
+    /// <para>Firewall checks the IP address of an incoming HTTP request and validates it against a list of individual IP addresses and/or CIDR notations.</para>
     /// <para>IP addresses and/or CIDR notations can be IPv4 or IPv6 address spaces.</para>
     /// </summary>
     public sealed class FirewallMiddleware
@@ -110,7 +110,7 @@ namespace Firewall
         {
             if (_logger != null)
                 _logger.LogWarning(
-                    "Firewall blocked an unauthorized IP Address '{address}' trying to access '{path}'.",
+                    "Firewall: Unauthorized access from IP Address '{address}' trying to reach '{path}' has been blocked.",
                     address,
                     context.Request.Path);
 

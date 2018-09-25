@@ -10,14 +10,14 @@ namespace Firewall
     public interface ICloudflareHelper
     {
         /// <summary>
-        /// Retrieves the latest lists of IP address ranges from Cloudflare.
+        /// Retrieves the latest list of IP addresses from Cloudflare.
         /// </summary>
         Task<(IList<IPAddress>, IList<CIDRNotation>)> GetIPAddressRangesAsync(
             string ipv4ListUrl = null,
             string ipv6ListUrl = null);
 
         /// <summary>
-        /// Retrieves the latest lists of IP address ranges from Cloudflare.
+        /// Retrieves the latest list of IP addresses from Cloudflare.
         /// </summary>
         (IList<IPAddress>, IList<CIDRNotation>) GetIPAddressRanges(
             string ipv4ListUrl = null,
