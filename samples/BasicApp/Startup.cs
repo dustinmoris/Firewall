@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,15 +15,18 @@ namespace BasicApp
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add dependencies
-
+            // Register dependencies:
             services.AddFirewall();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // Register middleware before other middleware
-            app.UseCloudflareFirewall(true);
+            // Register middleware before other middleware:
+            app.UseFirewall(
+                allowLocalRequests: true,
+                vipList: new List<IPAddress> { IPAddress.Parse("10.20.30.40") },
+                guestList: new List<CIDRNotation> { CIDRNotation.Parse("110.40.88.12/28") }
+            );
 
             app.Run(async (context) =>
             {
