@@ -15,7 +15,7 @@ Firewall adds IP address filtering capabilities to an ASP.NET Core web applicati
 
 Firewall is an ASP.NET Core middleware which enables IP address filtering based on individual IP addresses (VIP list) or IP address ranges (guest lists).
 
-IP address filtering can add an extra layer of security to a publicly exposed API or to force all API access through a certain set of proxy servers (e.g. [Cloudflare](https://www.cloudflare.com/)).
+IP address filtering can be added as an extra layer of security to a publicly exposed API or to force all API access through a certain set of proxy servers (e.g. [Cloudflare](https://www.cloudflare.com/)).
 
 ## Using with Cloudflare
 
@@ -24,10 +24,12 @@ IP address filtering can add an extra layer of security to a publicly exposed AP
 The typical request flow for a website which is not protected by Cloudflare looks a little bit like this:
 
 ![without-cloudflare](https://raw.githubusercontent.com/dustinmoris/Firewall/master/assets/without-cloudflare.png)
+*Image source: [blog.christophetd.fr](https://blog.christophetd.fr/)*
 
 When a website is protected by Cloudflare then Cloudflare essentially acts as a man in the middle, shielding a website from all sorts of malicious internet activity and giving a website administrator enhanced performance and security features such as HTTPS, Caching, CDNs, API rate limiting and more:
 
 ![with-cloudflare](https://raw.githubusercontent.com/dustinmoris/Firewall/master/assets/with-cloudflare.png)
+*Image source: [blog.christophetd.fr](https://blog.christophetd.fr/)*
 
 The only problem with this configuration is that an attacker can still access the origin server by [sending requests directly to its IP address](http://www.chokepoint.net/2017/10/exposing-server-ips-behind-cloudflare.html) and therefore [bypassing all additional security and performance layers provided by Cloudflare](https://blog.christophetd.fr/bypassing-cloudflare-using-internet-wide-scan-data/).
 
@@ -35,7 +37,7 @@ In order to prevent anyone from talking directly to the origin server and forcin
 
 Cloudflare [maintains two public lists](https://www.cloudflare.com/ips/) of all their [IPv4](https://www.cloudflare.com/ips-v4) and [IPv6](https://www.cloudflare.com/ips-v6) address ranges which can be used to configure an origin server's IP address filtering.
 
-[Firewall supports IP filtering for Cloudflare]() out of the box.
+[Firewall supports IP filtering for Cloudflare](#built-in-support-for-cloudflare-ip-ranges) out of the box.
 
 ## Getting Started
 
@@ -90,7 +92,54 @@ Firewall provides three options to configure IP address filtering:
 - `vipList`: A list of individual `IPAddress` objects which are granted access to the web application (VIPs).
 - `guestList`: A list of `CIDRNotation` objects which are granted access to the web application (all other guests).
 
-The terms `vipList` and `guestList` are basically fancier terms which have been chosen to replace the more dated description of "whitelist" when explaining the IP address filtering features of Firewall.
+The terms `vipList` and `guestList` are basically fancier terms which have been chosen to replace the more dated description of "whitelist" when explaining the IP address filtering capabilities of Firewall.
+
+### Built in support for Cloudflare IP ranges
+
+If an ASP.NET Core web application is going to sit behind Cloudflare then Firewall can be configured with the built in `UseCloudflareFirewall` extension method:
+
+```csharp
+using Firewall;
+
+namespace BasicApp
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // Register dependencies:
+            services.AddFirewall();
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            // Register middleware before other middleware:
+            app.UseCloudflareFirewall();
+
+            app.Run(async (context) =>
+            {
+                await context.Response.WriteAsync("Hello World!");
+            });
+        }
+    }
+}
+```
+
+The `UseCloudflareFirewall` extension method will automatically pull the latest list of IPv4 and IPv6 address ranges from Cloudflare and register the `FirewallMiddleware` with those values.
+
+Optionally one can specify custom URLs to link to IP address ranges and/or specify additional VIP and/or guest lists by setting the respective parameters:
+
+```csharp
+app.UseCloudflareFirewall(
+    allowLocalRequests: true,
+    ipv4ListUrl: "https://www.cloudflare.com/ips-v4",
+    ipv6ListUrl: "https://www.cloudflare.com/ips-v6",
+    additionalVipList: new List<IPAddress> { IPAddress.Parse("10.20.30.40") },
+    additionalGuestList: new List<CIDRNotation> { CIDRNotation.Parse("110.40.88.12/28") }
+);
+```
+
+The easiest way to generate a custom list of `IPAddress` or `CIDRNotation` objects is by making use of the `IPAddress.Parse("0.0.0.0")` and `CIDRNotation.Parse("0.0.0.0/32")` helper methods.
 
 ## License
 
