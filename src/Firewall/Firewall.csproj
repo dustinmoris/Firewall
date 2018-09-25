@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- General -->
     <AssemblyName>Firewall</AssemblyName>
-    <Version>1.0.0-alpha-001</Version>
+    <Version>1.1.0</Version>
     <Description>An ASP.NET Core middleware for filtering IP addresses.</Description>
     <Copyright>Copyright 2018 Dustin Moris Gorski</Copyright>
     <Authors>Dustin Moris Gorski and contributors</Authors>

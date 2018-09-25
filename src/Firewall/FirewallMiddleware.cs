@@ -9,7 +9,7 @@ namespace Firewall
 {
     /// <summary>
     /// An ASP.NET Core middlware for IP address filtering.
-    /// <para>Firewall checks the IP address of an incoming HTTP request and validates it against a list of single IP addresses or CIDR notations.</para>
+    /// <para>Firewall checks the IP address of an incoming HTTP request and validates it against a list of individual IP addresses and/or CIDR notations.</para>
     /// <para>IP addresses and/or CIDR notations can be IPv4 or IPv6 address spaces.</para>
     /// </summary>
     public sealed class FirewallMiddleware
@@ -48,15 +48,20 @@ namespace Firewall
         {
             if (_logger == null) return;
 
-            if (_vipList == null || _vipList.Count == 0)
-                _logger.LogInformation("No VIP list specified.");
-            else
-                _logger.LogInformation("Firewall has been configured with the following VIP list: {vipList}.", _vipList);
+            _logger.LogInformation(
+                _allowLocalRequests
+                ? "Firewall: Requests from the local IP address are allowed."
+                : "Firewall: Requests from the local IP address are not allowed.");
 
-            if (_guestList == null || _guestList.Count == 0)
-                _logger.LogInformation("No Guest list specified.");
-            else
-                _logger.LogInformation("Firewall has been configured with the following Guest list: {guestList}.", _guestList);
+            _logger.LogInformation(
+                _vipList == null || _vipList.Count == 0
+                ? "Firewall: No VIP list specified."
+                : "Firewall: VIP list: {vipList}.", _vipList);
+
+            _logger.LogInformation(
+                _guestList == null || _guestList.Count == 0
+                ? "Firewall: No Guest list specified."
+                : "Firewall: Guest list: {guestList}.", _guestList);
         }
 
         /// <summary>
@@ -105,7 +110,7 @@ namespace Firewall
         {
             if (_logger != null)
                 _logger.LogWarning(
-                    "Firewall blocked an unauthorized IP Address '{address}' trying to access '{path}'.",
+                    "Firewall: Unauthorized access from IP Address '{address}' trying to reach '{path}' has been blocked.",
                     address,
                     context.Request.Path);
 
