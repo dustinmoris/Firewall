@@ -11,11 +11,23 @@ Firewall adds IP address filtering capabilities to an ASP.NET Core web applicati
 | [![Build status](https://ci.appveyor.com/api/projects/status/6x0pse65273xp9rw/branch/develop?svg=true)](https://ci.appveyor.com/project/dustinmoris/firewall/branch/develop) | [![Linux Build status](https://travis-ci.org/dustinmoris/Firewall.svg?branch=develop)](https://travis-ci.org/dustinmoris/Firewall/builds?branch=develop) |
 | [![Windows Build history](https://buildstats.info/appveyor/chart/dustinmoris/Firewall?branch=develop&includeBuildsFromPullRequest=false)](https://ci.appveyor.com/project/dustinmoris/Firewall/history?branch=develop) | [![Linux Build history](https://buildstats.info/travisci/chart/dustinmoris/Firewall?branch=develop&includeBuildsFromPullRequest=false)](https://travis-ci.org/dustinmoris/Firewall/builds?branch=develop) |
 
+## Table of contents
+
+- [About](#about)
+- [Using with Cloudflare](#using-with-cloudflare)
+- [Getting Started](#getting-started)
+- [License](#license)
+- [Credits](#credits)
+
 ## About
 
 Firewall is an ASP.NET Core middleware which enables IP address filtering based on individual IP addresses (VIP list) or IP address ranges (guest lists).
 
 IP address filtering can be added as an extra layer of security to a publicly exposed API or to force all API access through a certain set of proxy servers (e.g. [Cloudflare](https://www.cloudflare.com/)).
+
+### How is it different to ASP.NET Core's IP safelist feature?
+
+Simply ASP.NET Core's [safelist](https://docs.microsoft.com/en-us/aspnet/core/security/ip-safelist?view=aspnetcore-2.1) feature doesn't support IPv4 and IPv6 address ranges specified through CIDR notations, which makes is somewhat unusable in the real world where a web application might need to "safelist" a CIDR notation which can span across hundreds or thousands of different unique IPv6 addresses.
 
 ## Using with Cloudflare
 
@@ -24,11 +36,13 @@ IP address filtering can be added as an extra layer of security to a publicly ex
 The typical request flow for a website which is not protected by Cloudflare looks a little bit like this:
 
 ![without-cloudflare](https://raw.githubusercontent.com/dustinmoris/Firewall/master/assets/without-cloudflare.png)
+
 *Image source: [blog.christophetd.fr](https://blog.christophetd.fr/)*
 
 When a website is protected by Cloudflare then Cloudflare essentially acts as a man in the middle, shielding a website from all sorts of malicious internet activity and giving a website administrator enhanced performance and security features such as HTTPS, Caching, CDNs, API rate limiting and more:
 
 ![with-cloudflare](https://raw.githubusercontent.com/dustinmoris/Firewall/master/assets/with-cloudflare.png)
+
 *Image source: [blog.christophetd.fr](https://blog.christophetd.fr/)*
 
 The only problem with this configuration is that an attacker can still access the origin server by [sending requests directly to its IP address](http://www.chokepoint.net/2017/10/exposing-server-ips-behind-cloudflare.html) and therefore [bypassing all additional security and performance layers provided by Cloudflare](https://blog.christophetd.fr/bypassing-cloudflare-using-internet-wide-scan-data/).
