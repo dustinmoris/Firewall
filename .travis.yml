@@ -20,4 +20,5 @@ before_install:
   - sudo pwsh ./.psscripts/install-dotnet.ps1
 
 script:
+  - export FrameworkPathOverride=$(dirname $(which mono))/../lib/mono/4.5/
   - pwsh ./build.ps1 -Release
