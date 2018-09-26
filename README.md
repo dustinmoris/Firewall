@@ -16,6 +16,9 @@ Firewall adds IP address filtering capabilities to an ASP.NET Core web applicati
 - [About](#about)
 - [Using with Cloudflare](#using-with-cloudflare)
 - [Getting Started](#getting-started)
+- [Diagnostics](#diagnostics)
+- [Contributing](#contributing)
+- [Support](#support)
 - [License](#license)
 - [Credits](#credits)
 
@@ -127,7 +130,7 @@ namespace BasicApp
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // Register middleware before other middleware:
+            // Register Firewall middleware:
             app.UseCloudflareFirewall();
 
             app.Run(async (context) =>
@@ -154,6 +157,91 @@ app.UseCloudflareFirewall(
 ```
 
 The easiest way to generate a custom list of `IPAddress` or `CIDRNotation` objects is by making use of the `IPAddress.Parse("0.0.0.0")` and `CIDRNotation.Parse("0.0.0.0/32")` helper methods.
+
+If you have another proxy sitting between Cloudflare and the origin server (e.g. load balancer) then you'll have to enable the `ForwardedHeader` middleware, which will make sure to set Cloudflare's IP address to the `RemoteIpAddress` property of the `HttpContext.Connection` object (by reading the correct value from the `X-Forwarded-For` HTTP header):
+
+```csharp
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    app.UseForwardedHeaders(
+        new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor,
+            ForwardLimit = 1
+        }
+    );
+
+    // Register Firewall after error handling and forwarded headers,
+    // but before other middleware:
+    app.UseCloudflareFirewall();
+
+    app.Run(async (context) =>
+    {
+        await context.Response.WriteAsync("Hello World!");
+    });
+}
+```
+
+Please be aware that the `ForwardedHeaders` middleware must be registered before the `FirewallMiddleware` and also note that it is not recommended to set `ForwardedLimit` to a value greater than 1 unless you also provide a list of trusted proxies.
+
+## Diagnostics
+
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked then you can  turn up the log level to a minimum of `Information` of your ASP.NET Core application in order to get more diagnostics information:
+
+```csharp
+// In this example Serilog is used to log to the console,
+// but any .NET Core logger will work:
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        RunWebserver(args);
+    }
+
+    public static void RunWebserver(string[] args)
+    {
+        Log.Logger =
+            new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateLogger();
+        WebHost
+            .CreateDefaultBuilder(args)
+            .UseSerilog()
+            .UseStartup<Startup>()
+            .Build()
+            .Run();
+    }
+}
+```
+
+Sample console output when log level is set to `Information`:
+
+```
+[20:30:45 INF] Firewall: Requests from the local IP address are allowed.
+[20:30:45 INF] Firewall: VIP list: ["10.20.30.40", "1.2.3.4", "5.6.7.8"].
+[20:30:45 INF] Firewall: Guest list: ["110.40.88.12/28", "88.77.99.11/8"].
+Hosting environment: Development
+Content root path: /Redacted/Firewall/samples/BasicApp
+Now listening on: https://localhost:5001
+Now listening on: http://localhost:5000
+Application started. Press Ctrl+C to shut down.
+[20:37:09 INF] Request starting HTTP/1.1 GET http://localhost:5000/
+[20:37:09 INF] Request finished in 27.1814ms 200
+[20:37:29 INF] Request starting HTTP/1.1 GET http://localhost:5000/
+[20:37:29 WRN] Firewall: Unauthorized access from IP Address '23.53.121.53' trying to reach '/' has been blocked.
+[20:37:29 INF] Request finished in 10.052ms 403
+```
+
+## Contributing
+
+Feedback is welcome and pull requests get accepted!
+
+## Support
+
+If you've got value from any of the content which I have created, but pull requests are not your thing, then I would also very much appreciate your support by buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/dustinmoris" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
 ## License
 

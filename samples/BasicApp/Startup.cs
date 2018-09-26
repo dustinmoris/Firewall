@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Firewall;
 
@@ -21,11 +22,29 @@ namespace BasicApp
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // Register middleware before other middleware:
+            app.UseForwardedHeaders(
+                new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor,
+                    ForwardLimit = 1
+                }
+            );
+
+            // Register Firewall after error handling and forwarded headers,
+            // but before other middleware:
             app.UseFirewall(
                 allowLocalRequests: true,
-                vipList: new List<IPAddress> { IPAddress.Parse("10.20.30.40") },
-                guestList: new List<CIDRNotation> { CIDRNotation.Parse("110.40.88.12/28") }
+                vipList: new List<IPAddress>
+                    {
+                        IPAddress.Parse("10.20.30.40"),
+                        IPAddress.Parse("1.2.3.4"),
+                        IPAddress.Parse("5.6.7.8")
+                    },
+                guestList: new List<CIDRNotation>
+                    {
+                        CIDRNotation.Parse("110.40.88.12/28"),
+                        CIDRNotation.Parse("88.77.99.11/8")
+                    }
             );
 
             app.Run(async (context) =>

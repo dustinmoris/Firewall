@@ -5,8 +5,9 @@ dist: trusty
 dotnet: 2.1.402
 
 mono:
-  - 4.6.1
+  - 4.6.2
   - 4.8.1
+  - 5.14.0
 
 os:
   - linux
