@@ -12,16 +12,17 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse("12.34.56.78");
-        var vipList = new List<IPAddress> { allowedIpAddress };
+        var allowedIpAddresses = new List<IPAddress> { allowedIpAddress };
+
         var firewall = new FirewallMiddleware(
             async (innerCtx) =>
                 {
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: null,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddresses(allowedIpAddresses),
             logger: null);
 
         var httpContext = new DefaultHttpContext();
@@ -38,16 +39,16 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse("12.34.56.78");
-        var vipList = new List<IPAddress> { allowedIpAddress };
+        var allowedIpAddresses = new List<IPAddress> { allowedIpAddress };
         var firewall = new FirewallMiddleware(
             async (innerCtx) =>
                 {
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: null,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddresses(allowedIpAddresses),
             logger: null);
 
         var httpContext = new DefaultHttpContext();
@@ -64,16 +65,16 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse("174.74.115.197");
-        var guestList = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
+        var cidrNotations = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
         var firewall = new FirewallMiddleware(
             async (innerCtx) =>
                 {
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: null,
-            guestList: guestList,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddressRanges(cidrNotations),
             logger: null);
 
         var httpContext = new DefaultHttpContext();
@@ -90,16 +91,16 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse("174.74.115.210");
-        var guestList = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
+        var cidrNotations = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
         var firewall = new FirewallMiddleware(
             async (innerCtx) =>
                 {
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: null,
-            guestList: guestList,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddressRanges(cidrNotations),
             logger: null);
 
         var httpContext = new DefaultHttpContext();
@@ -121,13 +122,13 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse(ip);
-        var vipList = new List<IPAddress>
+        var allowedIpAddresses = new List<IPAddress>
             {
                 IPAddress.Parse("1.2.3.4"),
                 IPAddress.Parse("10.20.30.40"),
                 IPAddress.Parse("50.6.70.8")
             };
-        var guestList = new List<CIDRNotation>
+        var cidrNotations = new List<CIDRNotation>
             {
                 CIDRNotation.Parse("2803:f800::/32"),
                 CIDRNotation.Parse("2c0f:f248::/32"),
@@ -141,9 +142,10 @@ public class FirewallMiddlewareTests
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: guestList,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddresses(allowedIpAddresses)
+                .ExceptFromIPAddressRanges(cidrNotations),
             logger: null);
 
         var httpContext = new DefaultHttpContext();
@@ -165,13 +167,13 @@ public class FirewallMiddlewareTests
     {
         var isSuccess = false;
         var allowedIpAddress = IPAddress.Parse(ip);
-        var vipList = new List<IPAddress>
+        var allowedIpAddresses = new List<IPAddress>
             {
                 IPAddress.Parse("1.2.3.4"),
                 IPAddress.Parse("10.20.30.40"),
                 IPAddress.Parse("50.6.70.8")
             };
-        var guestList = new List<CIDRNotation>
+        var cidrNotations = new List<CIDRNotation>
             {
                 CIDRNotation.Parse("2803:f800::/32"),
                 CIDRNotation.Parse("2c0f:f248::/32"),
@@ -185,9 +187,10 @@ public class FirewallMiddlewareTests
                     isSuccess = true;
                     await innerCtx.Response.WriteAsync("Success!");
                 },
-            allowLocalRequests: false,
-            vipList: vipList,
-            guestList: guestList,
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromIPAddresses(allowedIpAddresses)
+                .ExceptFromIPAddressRanges(cidrNotations),
             logger: null);
 
         var httpContext = new DefaultHttpContext();

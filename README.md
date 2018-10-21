@@ -1,8 +1,8 @@
 # ![Firewall](https://raw.githubusercontent.com/dustinmoris/Firewall/master/firewall.png) Firewall
 
-ASP.NET Core middleware for IP address filtering.
+ASP.NET Core middleware for request filtering.
 
-Firewall adds IP address filtering capabilities to an ASP.NET Core web application by limiting access to a pre-configured range of IP addresses.
+Firewall adds IP address-, geo-location and custom filtering capabilities to an ASP.NET Core web application which gives control over which connections are allowed to access the web server.
 
 [![NuGet Info](https://buildstats.info/nuget/Firewall?includePreReleases=true)](https://www.nuget.org/packages/Firewall/)
 
@@ -16,7 +16,13 @@ Firewall adds IP address filtering capabilities to an ASP.NET Core web applicati
 - [About](#about)
 - [Using with Cloudflare](#using-with-cloudflare)
 - [Getting Started](#getting-started)
-- [Diagnostics](#diagnostics)
+- [Documentation](#documentation)
+    - [Basics](#basics)
+    - [Cloudflare Support](#cloudflare-support)
+    - [Miscellaneous](#miscellaneous)
+        - [IP Address and CIDR Notation Parsing](#ip-address-and-cidr-notation-parsing)
+        - [X-Forwarded-For HTTP Header](#x-forwarded-for-http-header)
+    - [Diagnostics](#diagnostics)
 - [Contributing](#contributing)
 - [Support](#support)
 - [License](#license)
@@ -24,13 +30,13 @@ Firewall adds IP address filtering capabilities to an ASP.NET Core web applicati
 
 ## About
 
-Firewall is an ASP.NET Core middleware which enables IP address filtering based on individual IP addresses (VIP list) or IP address ranges (guest lists).
+Firewall is an ASP.NET Core middleware which enables IPv4 and IPv6 address-, geo-location and other request filtering features.
 
-IP address filtering can be added as an extra layer of security to a publicly exposed API or to force all API access through a certain set of proxy servers (e.g. [Cloudflare](https://www.cloudflare.com/)).
+Request filtering can be added as an extra layer of security to a publicly exposed API or to force all API access through a certain set of proxy servers (e.g. [Cloudflare](https://www.cloudflare.com/)).
 
 ### How is it different to ASP.NET Core's IP safelist feature?
 
-Simply ASP.NET Core's [safelist](https://docs.microsoft.com/en-us/aspnet/core/security/ip-safelist?view=aspnetcore-2.1) feature doesn't support IPv4 and IPv6 address ranges specified through CIDR notations, which makes is somewhat unusable in the real world where a web application might need to "safelist" a CIDR notation which can span across hundreds or thousands of different unique IPv6 addresses.
+Simply ASP.NET Core's [safelist](https://docs.microsoft.com/en-us/aspnet/core/security/ip-safelist?view=aspnetcore-2.1) feature doesn't support IPv4 and IPv6 address ranges specified through CIDR notations, which makes is somewhat less usable in the real world where a web application might need to "safelist" a CIDR notation as part of its security configuration.
 
 ## Using with Cloudflare
 
@@ -70,7 +76,7 @@ PM> Install-Package Firewall
 dotnet add [PROJECT] package Firewall --package-directory [PACKAGE_CIRECTORY]
 ```
 
-Then add the Firewall middleware to your ASP.NET Core `Startup` class and register all dependencies:
+Then add the Firewall middleware to your ASP.NET Core `Startup` class:
 
 ```csharp
 using Firewall;
@@ -79,20 +85,28 @@ namespace BasicApp
 {
     public class Startup
     {
-        public void ConfigureServices(IServiceCollection services)
+        public void Configure(IApplicationBuilder app)
         {
-            // Register dependencies:
-            services.AddFirewall();
-        }
+            var allowedIPs =
+                new List<IPAddress>
+                    {
+                        IPAddress.Parse("10.20.30.40"),
+                        IPAddress.Parse("1.2.3.4"),
+                        IPAddress.Parse("5.6.7.8")
+                    };
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            // Register middleware before other middleware:
+            var allowedCIDRs =
+                new List<CIDRNotation>
+                    {
+                        CIDRNotation.Parse("110.40.88.12/28"),
+                        CIDRNotation.Parse("88.77.99.11/8")
+                    };
+
             app.UseFirewall(
-                allowLocalRequests: true,
-                vipList: new List<IPAddress> { IPAddress.Parse("10.20.30.40") },
-                guestList: new List<CIDRNotation> { CIDRNotation.Parse("110.40.88.12/28") }
-            );
+                FirewallRulesEngine
+                    .DenyAllAccess()
+                    .ExceptFromIPAddresses(allowedIPs)
+                    .ExceptFromIPAddressRanges(allowedCIDRs));
 
             app.Run(async (context) =>
             {
@@ -103,17 +117,35 @@ namespace BasicApp
 }
 ```
 
-Firewall provides three options to configure IP address filtering:
+## Documentation
 
-- `allowLocalRequests`: Boolean flag which controls whether requests from the local IP address are allowed or not (useful when debugging on localhost).
-- `vipList`: A list of individual `IPAddress` objects which are granted access to the web application (VIPs).
-- `guestList`: A list of `CIDRNotation` objects which are granted access to the web application (all other guests).
+### Basics
 
-The terms `vipList` and `guestList` are basically fancier terms which have been chosen to replace the more dated description of "whitelist" when explaining the IP address filtering capabilities of Firewall.
+Firewall uses a rules engine to configure request filtering. The `FirewallRulesEngine` helper class should be used to configure an object of `IFirewallRule` which then can be passed into the `FirewallMiddleware`:
 
-### Built in support for Cloudflare IP ranges
+```csharp
+var rules =
+    FirewallRulesEngine
+        .DenyAllAccess()
+        .ExceptFromLocalhost()
+        .ExceptFromCloudflare();
 
-If an ASP.NET Core web application is going to sit behind Cloudflare then Firewall can be configured with the built in `UseCloudflareFirewall` extension method:
+app.UseFirewall(rules);
+```
+
+Currently the following rules can be configures out of the box:
+
+- `DenyAllAccess()`: This is the base rule which should be used at the beginning of the rules configuration. It specifies that if no other rule can be met by an incoming HTTP request then access should be denied.
+- `ExceptFromLocalhost()`: This rule specifies that HTTP requests from the local host should be allowed. This might be useful when debugging the application.
+- `ExceptFromIPAddresses(IList<IPAddress> ipAddresses)`: This rule enables access to a list of specific IP addresses.
+- `ExceptFromIPAddressRanges(IList<CIDRNotation> cidrNotations)`: This rule enables access to a list of specific IP address ranges (CIDR notations).
+- `ExceptFromCloudflare(string ipv4Url = null, string ipv6Url = null)`: This rule enables access to requests from Cloudflare servers.
+
+A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules first before declaring more complex rules.
+
+### Cloudflare Support
+
+If an ASP.NET Core web application is going to sit behind Cloudflare then Firewall can be configured with the built-in `ExceptFromCloudflare()` Firewall rule:
 
 ```csharp
 using Firewall;
@@ -122,16 +154,12 @@ namespace BasicApp
 {
     public class Startup
     {
-        public void ConfigureServices(IServiceCollection services)
+        public void Configure(IApplicationBuilder app)
         {
-            // Register dependencies:
-            services.AddFirewall();
-        }
-
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            // Register Firewall middleware:
-            app.UseCloudflareFirewall();
+            app.UseFirewall(
+                FirewallRulesEngine
+                    .DenyAllAccess()
+                    .ExceptFromCloudflare());
 
             app.Run(async (context) =>
             {
@@ -142,23 +170,45 @@ namespace BasicApp
 }
 ```
 
-The `UseCloudflareFirewall` extension method will automatically pull the latest list of IPv4 and IPv6 address ranges from Cloudflare and register the `FirewallMiddleware` with those values.
+The `ExceptFromCloudflare()` configuration method will automatically pull the latest list of IPv4 and IPv6 address ranges from Cloudflare and register the `FirewallMiddleware` with those values.
 
-Optionally one can specify custom URLs to link to IP address ranges and/or specify additional VIP and/or guest lists by setting the respective parameters:
+Optionally one can specify custom URLs to load the correct IP address ranges from:
 
 ```csharp
-app.UseCloudflareFirewall(
-    allowLocalRequests: true,
-    ipv4ListUrl: "https://www.cloudflare.com/ips-v4",
-    ipv6ListUrl: "https://www.cloudflare.com/ips-v6",
-    additionalVipList: new List<IPAddress> { IPAddress.Parse("10.20.30.40") },
-    additionalGuestList: new List<CIDRNotation> { CIDRNotation.Parse("110.40.88.12/28") }
-);
+using Firewall;
+
+namespace BasicApp
+{
+    public class Startup
+    {
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseFirewall(
+                FirewallRulesEngine
+                    .DenyAllAccess()
+                    .ExceptFromCloudflare(
+                        ipv4ListUrl: "https://www.cloudflare.com/ips-v4",
+                        ipv6ListUrl: "https://www.cloudflare.com/ips-v6"
+                    ));
+
+            app.Run(async (context) =>
+            {
+                await context.Response.WriteAsync("Hello World!");
+            });
+        }
+    }
+}
 ```
+
+### Miscellaneous
+
+#### IP Address and CIDR Notation Parsing
 
 The easiest way to generate a custom list of `IPAddress` or `CIDRNotation` objects is by making use of the `IPAddress.Parse("0.0.0.0")` and `CIDRNotation.Parse("0.0.0.0/32")` helper methods.
 
-If you have another proxy sitting between Cloudflare and the origin server (e.g. load balancer) then you'll have to enable the `ForwardedHeader` middleware, which will make sure to set Cloudflare's IP address to the `RemoteIpAddress` property of the `HttpContext.Connection` object (by reading the correct value from the `X-Forwarded-For` HTTP header):
+#### X-Forwarded-For HTTP Header
+
+If you have other proxies sitting between Cloudflare and the origin server (e.g. load balancer) then you'll have to enable the `ForwardedHeader` middleware, which will make sure that the correct IP address will be assigned to the `RemoteIpAddress` property of the `HttpContext.Connection` object:
 
 ```csharp
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -182,11 +232,11 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 }
 ```
 
-Please be aware that the `ForwardedHeaders` middleware must be registered before the `FirewallMiddleware` and also note that it is not recommended to set `ForwardedLimit` to a value greater than 1 unless you also provide a list of trusted proxies.
+Please be aware that the `ForwardedHeaders` middleware must be registered before the `FirewallMiddleware` and also that it is not recommended to set the `ForwardedLimit` to a value greater than 1 unless you also provide a list of trusted proxies.
 
-## Diagnostics
+### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked then you can  turn up the log level to a minimum of `Information` of your ASP.NET Core application in order to get more diagnostics information:
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Information` and retrieve more diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,
@@ -195,10 +245,10 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        RunWebserver(args);
+        RunWebServer(args);
     }
 
-    public static void RunWebserver(string[] args)
+    public static void RunWebServer(string[] args)
     {
         Log.Logger =
             new LoggerConfiguration()

@@ -15,10 +15,10 @@ namespace BasicApp
     {
         public static void Main(string[] args)
         {
-            RunWebserver(args);
+            RunWebServer(args);
         }
 
-        public static void RunWebserver(string[] args)
+        public static void RunWebServer(string[] args)
         {
             Log.Logger =
                 new LoggerConfiguration()
