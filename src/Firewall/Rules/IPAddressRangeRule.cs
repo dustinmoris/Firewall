@@ -1,0 +1,39 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+
+namespace Firewall
+{
+    /// <summary>
+    /// A Firewall rule which permits access to a given list of IP address ranges (expressed as CIDR notations).
+    /// </summary>
+    public sealed class IPAddressRangeRule : IFirewallRule
+    {
+        private readonly IFirewallRule _nextRule;
+        private readonly IList<CIDRNotation> _cidrNotations;
+
+        /// <summary>
+        /// Initialises a new instance of <see cref="IPAddressRangeRule"/>.
+        /// </summary>
+        public IPAddressRangeRule(IFirewallRule nextRule, IList<CIDRNotation> cidrNotations)
+        {
+            _nextRule = nextRule;
+            _cidrNotations = cidrNotations;
+        }
+
+        /// <summary>
+        /// Denotes whether a given <see cref="HttpContext"/> is permitted to access the web server.
+        /// </summary>
+        public bool IsAllowed(HttpContext context)
+        {
+            var remoteIpAddress = context.Connection.RemoteIpAddress;
+
+            if (_cidrNotations != null && _cidrNotations.Count > 0)
+                foreach (var cidr in _cidrNotations)
+                    if (cidr.Contains(remoteIpAddress))
+                        return true;
+
+            return _nextRule.IsAllowed(context);
+        }
+    }
+}

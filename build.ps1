@@ -28,6 +28,7 @@ if ($ClearOnly.IsPresent)
 
 $lib   = "./src/Firewall/Firewall.csproj"
 $tests = "./tests/Firewall.Tests/Firewall.Tests.csproj"
+$sample = "./samples/BasicApp/BasicApp.csproj"
 
 $version = Get-ProjectVersion $lib
 Update-AppVeyorBuildVersion $version
@@ -44,7 +45,7 @@ Remove-OldBuildArtifacts
 $configuration = if ($Release.IsPresent) { "Release" } else { "Debug" }
 
 Write-Host "Building Firewall..." -ForegroundColor Magenta
-dotnet-build   $lib "-c $configuration"
+dotnet-build $lib "-c $configuration"
 
 if (!$ExcludeTests.IsPresent -and !$Run.IsPresent)
 {
@@ -53,6 +54,9 @@ if (!$ExcludeTests.IsPresent -and !$Run.IsPresent)
     dotnet-build $tests
     dotnet-test  $tests
 }
+
+Write-Host "Building samples..." -ForegroundColor Magenta
+dotnet-build $sample "-c $configuration"
 
 if ($Pack.IsPresent)
 {
