@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Firewall
 {
@@ -68,9 +70,19 @@ namespace Firewall
         /// </summary>
         public static IFirewallRule ExceptFromCountries(
             this IFirewallRule rule,
-            IList<IsoCode> countries)
+            IList<CountryCode> countries)
         {
             return new CountryRule(rule, countries);
+        }
+
+        /// <summary>
+        /// Configures the Firewall to allow requests which satisfy a custom <paramref name="filter"/>.
+        /// </summary>
+        public static IFirewallRule ExceptWhen(
+            this IFirewallRule rule,
+            Func<HttpContext, bool> filter)
+        {
+            return new CustomRule(rule, filter);
         }
     }
 }

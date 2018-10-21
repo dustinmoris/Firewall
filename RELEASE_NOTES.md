@@ -16,6 +16,7 @@ See the updated README for more detailed information.
 #### New features
 
 - Added request filtering by countries using the GeoIP2 database.
+- Added custom request filtering features.
 
 ## 1.1.0
 

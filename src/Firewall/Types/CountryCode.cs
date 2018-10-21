@@ -1,10 +1,10 @@
-namespace Firewall
+﻿namespace Firewall
 {
     /// <summary>
     /// An enumeration of all ISO 3166 country codes.
     /// See: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
     /// </summary>
-    public enum IsoCode
+    public enum CountryCode
     {
         /// <summary>Andorra</summary>
         AD,

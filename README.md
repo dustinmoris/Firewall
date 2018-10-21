@@ -20,6 +20,7 @@ Firewall adds IP address-, geo-location and custom filtering capabilities to an 
     - [Basics](#basics)
     - [Cloudflare Support](#cloudflare-support)
     - [Custom Rules](#custom-rules)
+    - [Custom Filter Rules](#custom-filter-rules)
     - [Miscellaneous](#miscellaneous)
         - [IP Address and CIDR Notation Parsing](#ip-address-and-cidr-notation-parsing)
         - [X-Forwarded-For HTTP Header](#x-forwarded-for-http-header)
@@ -142,6 +143,8 @@ Currently the following rules can be configures out of the box:
 - `ExceptFromIPAddresses(IList<IPAddress> ipAddresses)`: This rule enables access to a list of specific IP addresses.
 - `ExceptFromIPAddressRanges(IList<CIDRNotation> cidrNotations)`: This rule enables access to a list of specific IP address ranges (CIDR notations).
 - `ExceptFromCloudflare(string ipv4Url = null, string ipv6Url = null)`: This rule enables access to requests from Cloudflare servers.
+- `ExceptFromCountry(IList<CountryCode> allowedCountries)`: This rule enables access to requests which originated from one of the specified countries.
+- `ExceptWhen(Func<HttpContext, bool> filter)`: This rule enables a custom request filter to be applied (see [Custom Filter Rules](#custom-filter-rules) for more info).
 
 A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules first before declaring more complex rules.
 
@@ -209,12 +212,12 @@ Custom Firewall rules can be added by creating a new class which implements `IFi
 For example, if one would like to create a new Firewall rule which filters requests based on [Cloudflare's `CF-IPCountry`](https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-CloudFlare-handle-HTTP-Request-headers-) HTTP header, then you'd start by implementing a new class which implements the `IFirewallRule` interface:
 
 ```csharp
-public class CustomRule : IFirewallRule
+public class IPCountryRule : IFirewallRule
 {
     private readonly IFirewallRule _nextRule;
     private readonly IList<string> _allowedCountryCodes;
 
-    public CustomRule(
+    public IPCountryRule(
         IFirewallRule nextRule,
         IList<string> allowedCountryCodes)
     {
@@ -237,7 +240,7 @@ public class CustomRule : IFirewallRule
 }
 ```
 
-The constructor of the `CustomRule` class takes in a list of allowed country codes and the next rule in the pipeline. If a HTTP request originated from an allowed country then the custom rule will return `true`, otherwise it will invoke the next rule of the rules engine.
+The constructor of the `IPCountryRule` class takes in a list of allowed country codes and the next rule in the pipeline. If a HTTP request originated from an allowed country then the custom rule will return `true`, otherwise it will invoke the next rule of the rules engine.
 
 In order to chain this rule into the existing rules engine one can add an additional extension method:
 
@@ -248,7 +251,7 @@ public static class FirewallRulesEngineExtensions
         this IFirewallRule rule,
         IList<string> allowedCountryCodes)
     {
-        return new CustomRule(rule, allowedCountryCodes);
+        return new IPCountryRule(rule, allowedCountryCodes);
     }
 }
 ```
@@ -272,6 +275,20 @@ public class Startup
         });
     }
 }
+```
+
+### Custom Filter Rules
+
+Another slightly less flexible, but much easier and quicker way of applying a custom rule is by using the `ExceptWhen(Func<HttpContext, bool> filter)` configuration method. The `ExceptWhen` method can be used to set up simple rules by providing a `Func<HttpContext, bool>` predicate:
+
+```csharp
+var adminIP = IPAddress.Parse("1.2.3.4");
+
+app.UseFirewall(
+    FirewallRulesEngine
+        .DenyAllAccess()
+        .ExceptFromCloudflare()
+        .ExceptWhen(ctx => ctx.Connection.RemoteIpAddress == adminIP));
 ```
 
 ### Miscellaneous
@@ -310,7 +327,7 @@ Please be aware that the `ForwardedHeaders` middleware must be registered before
 
 #### Loading Rules from Configuration
 
-Firewall doesn't prescribe a certain way of how to configure rules outside of the rules engine. It is up to an application author to decide how rules should be loaded from an external configuration provider. ASP.NET Core offers a wealth of default configuration providers which are recommended to use.
+Firewall doesn't prescribe a certain way of how to configure rules outside of the rules engine. It is up to an application author to decide how rules should be loaded from an external configuration provider. [ASP.NET Core offers a wealth of default configuration providers](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) which are recommended to use.
 
 Example:
 
@@ -349,7 +366,7 @@ public class Startup
 
 ### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Information` and retrieve more diagnostics:
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Warning` and retrieve more diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,
@@ -381,9 +398,6 @@ public class Program
 Sample console output when log level is set to `Information`:
 
 ```
-[20:30:45 INF] Firewall: Requests from the local IP address are allowed.
-[20:30:45 INF] Firewall: VIP list: ["10.20.30.40", "1.2.3.4", "5.6.7.8"].
-[20:30:45 INF] Firewall: Guest list: ["110.40.88.12/28", "88.77.99.11/8"].
 Hosting environment: Development
 Content root path: /Redacted/Firewall/samples/BasicApp
 Now listening on: https://localhost:5001
