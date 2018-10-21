@@ -19,9 +19,11 @@ Firewall adds IP address-, geo-location and custom filtering capabilities to an 
 - [Documentation](#documentation)
     - [Basics](#basics)
     - [Cloudflare Support](#cloudflare-support)
+    - [Custom Rules](#custom-rules)
     - [Miscellaneous](#miscellaneous)
         - [IP Address and CIDR Notation Parsing](#ip-address-and-cidr-notation-parsing)
         - [X-Forwarded-For HTTP Header](#x-forwarded-for-http-header)
+        - [Loading Rules from Configuration](#loading-rules-from-configuration)
     - [Diagnostics](#diagnostics)
 - [Contributing](#contributing)
 - [Support](#support)
@@ -200,6 +202,78 @@ namespace BasicApp
 }
 ```
 
+### Custom Rules
+
+Custom Firewall rules can be added by creating a new class which implements `IFirewallRule`.
+
+For example, if one would like to create a new Firewall rule which filters requests based on [Cloudflare's `CF-IPCountry`](https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-CloudFlare-handle-HTTP-Request-headers-) HTTP header, then you'd start by implementing a new class which implements the `IFirewallRule` interface:
+
+```csharp
+public class CustomRule : IFirewallRule
+{
+    private readonly IFirewallRule _nextRule;
+    private readonly IList<string> _allowedCountryCodes;
+
+    public CustomRule(
+        IFirewallRule nextRule,
+        IList<string> allowedCountryCodes)
+    {
+        _nextRule = nextRule;
+        _allowedCountryCodes = allowedCountryCodes;
+    }
+
+    public bool IsAllowed(HttpContext context)
+    {
+        const string headerKey = "CF-IPCountry";
+
+        if (!context.Request.Headers.ContainsKey(headerKey))
+            return _nextRule.IsAllowed(context);
+
+        var countryCode = context.Request.Headers[headerKey].ToString();
+        var isAllowed = _allowedCountryCodes.Contains(countryCode);
+
+        return isAllowed || _nextRule.IsAllowed(context);
+    }
+}
+```
+
+The constructor of the `CustomRule` class takes in a list of allowed country codes and the next rule in the pipeline. If a HTTP request originated from an allowed country then the custom rule will return `true`, otherwise it will invoke the next rule of the rules engine.
+
+In order to chain this rule into the existing rules engine one can add an additional extension method:
+
+```csharp
+public static class FirewallRulesEngineExtensions
+{
+    public static IFirewallRule ExceptFromCountryCodes(
+        this IFirewallRule rule,
+        IList<string> allowedCountryCodes)
+    {
+        return new CustomRule(rule, allowedCountryCodes);
+    }
+}
+```
+
+Afterwards the rule can be enabled by calling `ExceptFromCountryCodes(allowedCountryCodes)` during application setup:
+
+```csharp
+public class Startup
+{
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseFirewall(
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromCloudflare()
+                .ExceptFromCountryCodes(new [] { "US", "GB", "JP" }));
+
+        app.Run(async (context) =>
+        {
+            await context.Response.WriteAsync("Hello World!");
+        });
+    }
+}
+```
+
 ### Miscellaneous
 
 #### IP Address and CIDR Notation Parsing
@@ -233,6 +307,45 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 ```
 
 Please be aware that the `ForwardedHeaders` middleware must be registered before the `FirewallMiddleware` and also that it is not recommended to set the `ForwardedLimit` to a value greater than 1 unless you also provide a list of trusted proxies.
+
+#### Loading Rules from Configuration
+
+Firewall doesn't prescribe a certain way of how to configure rules outside of the rules engine. It is up to an application author to decide how rules should be loaded from an external configuration provider. ASP.NET Core offers a wealth of default configuration providers which are recommended to use.
+
+Example:
+
+```csharp
+public class Startup
+{
+    private readonly IConfiguration _config;
+
+    public void Configure(IApplicationBuilder app)
+    {
+        // Load custom config settings from whichever provider has been set up:
+        var enableLocalhost = _config.GetValue("AllowRequestsFromLocalhost", false);
+        var adminIPAddress = _config.GetValue<string>("AdminIPAddress", null);
+
+        // Configure default Firewall rules:
+        var firewallRules =
+            FirewallRulesEngine.DenyAllAccess();
+
+        // Add rules according to the config:
+        if (enableLocalhost)
+            firewallRules = firewallRules.ExceptFromLocalhost();
+
+        if (adminIPAddress != null)
+            firewallRules = firewallRules.ExceptFromIPAddresses(new [] { IPAddress.Parse(adminIPAddress) });
+
+        // Enable Firewall with the configured rules:
+        app.UseFirewall(firewallRules);
+
+        app.Run(async (context) =>
+        {
+            await context.Response.WriteAsync("Hello World!");
+        });
+    }
+}
+```
 
 ### Diagnostics
 
