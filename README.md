@@ -302,7 +302,7 @@ The easiest way to generate a custom list of `IPAddress` or `CIDRNotation` objec
 If you have other proxies sitting between Cloudflare and the origin server (e.g. load balancer) then you'll have to enable the `ForwardedHeader` middleware, which will make sure that the correct IP address will be assigned to the `RemoteIpAddress` property of the `HttpContext.Connection` object:
 
 ```csharp
-public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+public void Configure(IApplicationBuilder app)
 {
     app.UseForwardedHeaders(
         new ForwardedHeadersOptions
