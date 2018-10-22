@@ -60,7 +60,7 @@ namespace Firewall
 
             context.LogDebug(
                 nameof(CountryRule),
-                isAllowed ? "granted" : "denied",
+                isAllowed,
                 "it originated in '{country}'",
                 result.Country.Name);
 

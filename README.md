@@ -108,8 +108,8 @@ namespace BasicApp
             app.UseFirewall(
                 FirewallRulesEngine
                     .DenyAllAccess()
-                    .ExceptFromIPAddresses(allowedIPs)
-                    .ExceptFromIPAddressRanges(allowedCIDRs));
+                    .ExceptFromIPAddressRanges(allowedCIDRs)
+                    .ExceptFromIPAddresses(allowedIPs));
 
             app.Run(async (context) =>
             {
@@ -130,8 +130,8 @@ Firewall uses a rules engine to configure request filtering. The `FirewallRulesE
 var rules =
     FirewallRulesEngine
         .DenyAllAccess()
-        .ExceptFromLocalhost()
-        .ExceptFromCloudflare();
+        .ExceptFromCloudflare()
+        .ExceptFromLocalhost();
 
 app.UseFirewall(rules);
 ```
@@ -146,7 +146,7 @@ Currently the following rules can be configures out of the box:
 - `ExceptFromCountry(IList<CountryCode> allowedCountries)`: This rule enables access to requests which originated from one of the specified countries.
 - `ExceptWhen(Func<HttpContext, bool> filter)`: This rule enables a custom request filter to be applied (see [Custom Filter Rules](#custom-filter-rules) for more info).
 
-A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules first before declaring more complex rules.
+A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The reverse order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules at the end as they will get executed first.
 
 ### Cloudflare Support
 
@@ -266,8 +266,8 @@ public class Startup
         app.UseFirewall(
             FirewallRulesEngine
                 .DenyAllAccess()
-                .ExceptFromCloudflare()
-                .ExceptFromCountryCodes(new [] { "US", "GB", "JP" }));
+                .ExceptFromCountryCodes(new [] { "US", "GB", "JP" })
+                .ExceptFromCloudflare());
 
         app.Run(async (context) =>
         {
