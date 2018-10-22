@@ -44,6 +44,7 @@ namespace BasicApp
             app.UseFirewall(
                 FirewallRulesEngine
                     .DenyAllAccess()
+                    .ExceptFromCountries(new [] { CountryCode.FK })
                     .ExceptFromIPAddressRanges(allowedIPAddressRanges)
                     .ExceptFromIPAddresses(allowedIPAddresses)
                     .ExceptFromCloudflare()

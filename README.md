@@ -398,12 +398,23 @@ public class Program
 Sample console output when log level is set to `Debug`:
 
 ```
-[00:36:40 DBG] Firewall.LocalhostRule: Request has been denied access, because it didn't originate on the same host.
-[00:36:40 DBG] Firewall.IPAddressRangeRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't belong to any allowed address range.
-[00:36:40 DBG] Firewall.IPAddressRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't match any allowed addresses.
-[00:36:40 DBG] Firewall.IPAddressRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't match any allowed addresses.
-[00:36:40 DBG] Firewall.IPAddressRangeRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't belong to any allowed address range.
-[00:36:40 WRN] Firewall: Unauthorized access from IP Address '23.43.23.1' trying to reach '/' has been blocked.
+Hosting environment: Development
+Content root path: /Redacted/Firewall/samples/BasicApp
+Now listening on: https://localhost:5001
+Now listening on: http://localhost:5000
+Application started. Press Ctrl+C to shut down.
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLD" started.
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLE" started.
+[09:04:31 INF] Request starting HTTP/1.1 GET http://localhost:5000/
+[09:04:31 DBG] Wildcard detected, all requests with hosts will be allowed.
+[09:04:31 DBG] Firewall.CountryRule: Remote IP Address '::1' has been denied access, because it couldn't be verified against the current GeoIP2 database..
+[09:04:31 DBG] Firewall.IPAddressRule: Remote IP Address '::1' has been denied access, because it didn't match any known IP address.
+[09:04:31 DBG] Firewall.IPAddressRangeRule: Remote IP Address '::1' has been denied access, because it didn't belong to any known address range.
+[09:04:31 DBG] Firewall.IPAddressRule: Remote IP Address '::1' has been denied access, because it didn't match any known IP address.
+[09:04:31 DBG] Firewall.IPAddressRangeRule: Remote IP Address '::1' has been denied access, because it didn't belong to any known address range.
+[09:04:31 DBG] Firewall.LocalhostRule: Remote IP Address '::1' has been granted access, because it originated on localhost.
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLD" completed keep alive response.
+[09:04:31 INF] Request finished in 40.3263ms 200
 ```
 
 ## Contributing

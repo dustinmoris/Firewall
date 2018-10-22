@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using MaxMind.Db;
 using MaxMind.GeoIP2;
+using MaxMind.GeoIP2.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -52,19 +53,31 @@ namespace Firewall
         /// </summary>
         public bool IsAllowed(HttpContext context)
         {
-            var remoteIpAddress = context.Connection.RemoteIpAddress;
-            var result = _databaseReader.Country(remoteIpAddress);
-            var countryCode = result.Country.IsoCode;
+            try
+            {
+                var remoteIpAddress = context.Connection.RemoteIpAddress;
+                var result = _databaseReader.Country(remoteIpAddress);
+                var countryCode = result.Country.IsoCode;
 
-            var isAllowed = _allowedCountries.Contains(countryCode);
+                var isAllowed = _allowedCountries.Contains(countryCode);
 
-            context.LogDebug(
-                nameof(CountryRule),
-                isAllowed,
-                "it originated in '{country}'",
-                result.Country.Name);
+                context.LogDebug(
+                    nameof(CountryRule),
+                    isAllowed,
+                    "it originated in '{country}'",
+                    result.Country.Name);
 
-            return isAllowed || _nextRule.IsAllowed(context);
+                return isAllowed || _nextRule.IsAllowed(context);
+            }
+            catch (AddressNotFoundException)
+            {
+                context.LogDebug(
+                    nameof(CountryRule),
+                    false,
+                    "it couldn't be verified against the current GeoIP2 database.");
+
+                return _nextRule.IsAllowed(context);
+            }
         }
     }
 }
