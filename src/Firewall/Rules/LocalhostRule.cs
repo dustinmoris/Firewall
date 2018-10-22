@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 
@@ -13,10 +14,8 @@ namespace Firewall
         /// <summary>
         /// Initialises a new instance of <see cref="LocalhostRule"/>.
         /// </summary>
-        public LocalhostRule(IFirewallRule nextRule)
-        {
-            _nextRule = nextRule;
-        }
+        public LocalhostRule(IFirewallRule nextRule) =>
+            _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
 
         /// <summary>
         /// Denotes whether a given <see cref="HttpContext"/> is permitted to access the web server.
@@ -26,13 +25,18 @@ namespace Firewall
             var localIpAddress = context.Connection.LocalIpAddress;
             var remoteIpAddress = context.Connection.RemoteIpAddress;
 
-            var isAllowed =
+            var isLocalhost =
                 (remoteIpAddress != null
                     && remoteIpAddress.ToString() != "::1"
                     && remoteIpAddress.Equals(localIpAddress))
                 || IPAddress.IsLoopback(remoteIpAddress);
 
-            return isAllowed || _nextRule.IsAllowed(context);
+            context.LogDebug(
+                nameof(LocalhostRule),
+                isLocalhost,
+                isLocalhost ? "it originated on localhost" : "it didn't originate on localhost");
+
+            return isLocalhost || _nextRule.IsAllowed(context);
         }
     }
 }

@@ -44,10 +44,11 @@ namespace BasicApp
             app.UseFirewall(
                 FirewallRulesEngine
                     .DenyAllAccess()
-                    .ExceptFromLocalhost()
-                    .ExceptFromCloudflare()
+                    .ExceptFromCountries(new [] { CountryCode.FK })
+                    .ExceptFromIPAddressRanges(allowedIPAddressRanges)
                     .ExceptFromIPAddresses(allowedIPAddresses)
-                    .ExceptFromIPAddressRanges(allowedIPAddressRanges));
+                    .ExceptFromCloudflare()
+                    .ExceptFromLocalhost());
 
             app.Run(async (context) =>
             {

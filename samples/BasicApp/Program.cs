@@ -22,7 +22,7 @@ namespace BasicApp
         {
             Log.Logger =
                 new LoggerConfiguration()
-                    .MinimumLevel.Information()
+                    .MinimumLevel.Debug()
                     .WriteTo.Console()
                     .CreateLogger();
             WebHost

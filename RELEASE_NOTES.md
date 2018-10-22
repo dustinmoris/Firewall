@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+## 2.1.0
+
+#### New features
+
+- Added more detailed debug logging to rules engine.
+
+#### Bug fixes
+
+- `CountryRule` now properly handles an `AddressNotFoundException` exception.
+
 ## 2.0.0
 
 Changed the Firewall middleware to allow request filtering beyond simple IP address and IP address range checks and significantly simplified how Firewall rules are configured.

@@ -108,8 +108,8 @@ namespace BasicApp
             app.UseFirewall(
                 FirewallRulesEngine
                     .DenyAllAccess()
-                    .ExceptFromIPAddresses(allowedIPs)
-                    .ExceptFromIPAddressRanges(allowedCIDRs));
+                    .ExceptFromIPAddressRanges(allowedCIDRs)
+                    .ExceptFromIPAddresses(allowedIPs));
 
             app.Run(async (context) =>
             {
@@ -130,8 +130,8 @@ Firewall uses a rules engine to configure request filtering. The `FirewallRulesE
 var rules =
     FirewallRulesEngine
         .DenyAllAccess()
-        .ExceptFromLocalhost()
-        .ExceptFromCloudflare();
+        .ExceptFromCloudflare()
+        .ExceptFromLocalhost();
 
 app.UseFirewall(rules);
 ```
@@ -146,7 +146,7 @@ Currently the following rules can be configures out of the box:
 - `ExceptFromCountry(IList<CountryCode> allowedCountries)`: This rule enables access to requests which originated from one of the specified countries.
 - `ExceptWhen(Func<HttpContext, bool> filter)`: This rule enables a custom request filter to be applied (see [Custom Filter Rules](#custom-filter-rules) for more info).
 
-A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules first before declaring more complex rules.
+A HTTP request only needs to satisfy a single rule in order to pass the Firewall access control layer. The reverse order of the rules specifies the order in which an incoming HTTP request gets validated. It is advisable to specify simple/quick rules at the end as they will get executed first.
 
 ### Cloudflare Support
 
@@ -266,8 +266,8 @@ public class Startup
         app.UseFirewall(
             FirewallRulesEngine
                 .DenyAllAccess()
-                .ExceptFromCloudflare()
-                .ExceptFromCountryCodes(new [] { "US", "GB", "JP" }));
+                .ExceptFromCountryCodes(new [] { "US", "GB", "JP" })
+                .ExceptFromCloudflare());
 
         app.Run(async (context) =>
         {
@@ -366,7 +366,7 @@ public class Startup
 
 ### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Warning` and retrieve more diagnostics:
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Debug` and retrieve more diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,
@@ -382,7 +382,7 @@ public class Program
     {
         Log.Logger =
             new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
         WebHost
@@ -395,7 +395,7 @@ public class Program
 }
 ```
 
-Sample console output when log level is set to `Information`:
+Sample console output when log level is set to `Debug`:
 
 ```
 Hosting environment: Development
@@ -403,11 +403,18 @@ Content root path: /Redacted/Firewall/samples/BasicApp
 Now listening on: https://localhost:5001
 Now listening on: http://localhost:5000
 Application started. Press Ctrl+C to shut down.
-[20:37:09 INF] Request starting HTTP/1.1 GET http://localhost:5000/
-[20:37:09 INF] Request finished in 27.1814ms 200
-[20:37:29 INF] Request starting HTTP/1.1 GET http://localhost:5000/
-[20:37:29 WRN] Firewall: Unauthorized access from IP Address '23.53.121.53' trying to reach '/' has been blocked.
-[20:37:29 INF] Request finished in 10.052ms 403
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLD" started.
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLE" started.
+[09:04:31 INF] Request starting HTTP/1.1 GET http://localhost:5000/
+[09:04:31 DBG] Wildcard detected, all requests with hosts will be allowed.
+[09:04:31 DBG] Firewall.CountryRule: Remote IP Address '::1' has been denied access, because it couldn't be verified against the current GeoIP2 database..
+[09:04:31 DBG] Firewall.IPAddressRule: Remote IP Address '::1' has been denied access, because it didn't match any known IP address.
+[09:04:31 DBG] Firewall.IPAddressRangeRule: Remote IP Address '::1' has been denied access, because it didn't belong to any known address range.
+[09:04:31 DBG] Firewall.IPAddressRule: Remote IP Address '::1' has been denied access, because it didn't match any known IP address.
+[09:04:31 DBG] Firewall.IPAddressRangeRule: Remote IP Address '::1' has been denied access, because it didn't belong to any known address range.
+[09:04:31 DBG] Firewall.LocalhostRule: Remote IP Address '::1' has been granted access, because it originated on localhost.
+[09:04:31 DBG] Connection id "0HLHNUJVHUQLD" completed keep alive response.
+[09:04:31 INF] Request finished in 40.3263ms 200
 ```
 
 ## Contributing
