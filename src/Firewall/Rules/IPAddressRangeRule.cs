@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Firewall
 {
@@ -17,8 +19,8 @@ namespace Firewall
         /// </summary>
         public IPAddressRangeRule(IFirewallRule nextRule, IList<CIDRNotation> cidrNotations)
         {
-            _nextRule = nextRule;
-            _cidrNotations = cidrNotations;
+            _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
+            _cidrNotations = cidrNotations ?? throw new ArgumentNullException(nameof(cidrNotations));
         }
 
         /// <summary>
@@ -27,13 +29,26 @@ namespace Firewall
         public bool IsAllowed(HttpContext context)
         {
             var remoteIpAddress = context.Connection.RemoteIpAddress;
+            var (isAllowed, cidr) = MatchesAnyIPAddressRange(remoteIpAddress);
 
+            context.LogDebug(
+                nameof(IPAddressRangeRule),
+                isAllowed,
+                isAllowed
+                    ? $"it belongs to '{cidr}' address range"
+                    : "it didn't belong to any known address range");
+
+            return isAllowed || _nextRule.IsAllowed(context);
+        }
+
+        private (bool, CIDRNotation) MatchesAnyIPAddressRange(IPAddress remoteIpAddress)
+        {
             if (_cidrNotations != null && _cidrNotations.Count > 0)
                 foreach (var cidr in _cidrNotations)
                     if (cidr.Contains(remoteIpAddress))
-                        return true;
+                        return (true, cidr);
 
-            return _nextRule.IsAllowed(context);
+            return (false, null);
         }
     }
 }

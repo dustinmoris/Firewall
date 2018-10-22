@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,6 +6,7 @@ using System.Reflection;
 using MaxMind.Db;
 using MaxMind.GeoIP2;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Firewall
 {
@@ -25,7 +27,10 @@ namespace Firewall
             IList<CountryCode> allowedCountries,
             string geoIP2FileName = null)
         {
-            _nextRule = nextRule;
+            _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
+            if (allowedCountries == null)
+                throw new ArgumentNullException(nameof(allowedCountries));
+
             _allowedCountries =
                 allowedCountries
                     .Select(isoCode => isoCode.ToString())
@@ -50,8 +55,16 @@ namespace Firewall
             var remoteIpAddress = context.Connection.RemoteIpAddress;
             var result = _databaseReader.Country(remoteIpAddress);
             var countryCode = result.Country.IsoCode;
-            return _allowedCountries.Contains(countryCode) || _nextRule.IsAllowed(context);
 
+            var isAllowed = _allowedCountries.Contains(countryCode);
+
+            context.LogDebug(
+                nameof(CountryRule),
+                isAllowed ? "granted" : "denied",
+                "it originated in '{country}'",
+                result.Country.Name);
+
+            return isAllowed || _nextRule.IsAllowed(context);
         }
     }
 }

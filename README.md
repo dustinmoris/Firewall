@@ -366,7 +366,7 @@ public class Startup
 
 ### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Warning` and retrieve more diagnostics:
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Debug` and retrieve more diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,
@@ -382,7 +382,7 @@ public class Program
     {
         Log.Logger =
             new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
         WebHost
@@ -395,19 +395,15 @@ public class Program
 }
 ```
 
-Sample console output when log level is set to `Information`:
+Sample console output when log level is set to `Debug`:
 
 ```
-Hosting environment: Development
-Content root path: /Redacted/Firewall/samples/BasicApp
-Now listening on: https://localhost:5001
-Now listening on: http://localhost:5000
-Application started. Press Ctrl+C to shut down.
-[20:37:09 INF] Request starting HTTP/1.1 GET http://localhost:5000/
-[20:37:09 INF] Request finished in 27.1814ms 200
-[20:37:29 INF] Request starting HTTP/1.1 GET http://localhost:5000/
-[20:37:29 WRN] Firewall: Unauthorized access from IP Address '23.53.121.53' trying to reach '/' has been blocked.
-[20:37:29 INF] Request finished in 10.052ms 403
+[00:36:40 DBG] Firewall.LocalhostRule: Request has been denied access, because it didn't originate on the same host.
+[00:36:40 DBG] Firewall.IPAddressRangeRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't belong to any allowed address range.
+[00:36:40 DBG] Firewall.IPAddressRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't match any allowed addresses.
+[00:36:40 DBG] Firewall.IPAddressRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't match any allowed addresses.
+[00:36:40 DBG] Firewall.IPAddressRangeRule: Remote IP Address '23.43.23.1' has been denied access, because it didn't belong to any allowed address range.
+[00:36:40 WRN] Firewall: Unauthorized access from IP Address '23.43.23.1' trying to reach '/' has been blocked.
 ```
 
 ## Contributing

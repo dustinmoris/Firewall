@@ -16,8 +16,8 @@ namespace Firewall
         /// </summary>
         public CustomRule(IFirewallRule nextRule, Func<HttpContext, bool> filter)
         {
-            _nextRule = nextRule;
-            _filter = filter;
+            _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
+            _filter = filter ?? throw new ArgumentNullException(nameof(filter));
         }
 
         /// <summary>

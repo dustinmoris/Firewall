@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Http;
@@ -17,8 +18,8 @@ namespace Firewall
         /// </summary>
         public IPAddressRule(IFirewallRule nextRule, IList<IPAddress> ipAddresses)
         {
-            _nextRule = nextRule;
-            _ipAddresses = ipAddresses;
+            _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
+            _ipAddresses = ipAddresses ?? throw new ArgumentNullException(nameof(ipAddresses));
         }
 
         /// <summary>
@@ -27,13 +28,26 @@ namespace Firewall
         public bool IsAllowed(HttpContext context)
         {
             var remoteIpAddress = context.Connection.RemoteIpAddress;
+            var (isAllowed, ip) = MatchesAnyIPAddress(remoteIpAddress);
 
+            context.LogDebug(
+                nameof(IPAddressRule),
+                isAllowed,
+                isAllowed
+                ? $"it matched '{ip}'"
+                : "it didn't match any known IP address");
+
+            return isAllowed || _nextRule.IsAllowed(context);
+        }
+
+        private (bool, IPAddress) MatchesAnyIPAddress(IPAddress remoteIpAddress)
+        {
             if (_ipAddresses != null && _ipAddresses.Count > 0)
                 foreach (var ip in _ipAddresses)
                     if (ip.IsEqualTo(remoteIpAddress))
-                        return true;
+                        return (true, ip);
 
-            return _nextRule.IsAllowed(context);
+            return (false, null);
         }
     }
 }
