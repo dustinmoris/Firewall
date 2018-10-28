@@ -7,7 +7,8 @@ param
     [switch] $Release,
     [switch] $ExcludeTests,
     [switch] $Pack,
-    [switch] $ClearOnly
+    [switch] $ClearOnly,
+    [switch] $Run
 )
 
 # ----------------------------------------------
@@ -66,3 +67,9 @@ if ($Pack.IsPresent)
 }
 
 Write-SuccessFooter "Firewall build completed successfully!"
+
+if ($Run.IsPresent)
+{
+    Write-Host "Launching SampleApp..." -ForegroundColor Magenta
+    dotnet-run $sample
+}
