@@ -32,7 +32,7 @@ namespace Firewall
                 || IPAddress.IsLoopback(remoteIpAddress);
 
             context.LogDebug(
-                nameof(LocalhostRule),
+                typeof(LocalhostRule),
                 isLocalhost,
                 isLocalhost ? "it originated on localhost" : "it didn't originate on localhost");
 

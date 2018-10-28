@@ -31,7 +31,7 @@ namespace Firewall
             var (isAllowed, ip) = MatchesAnyIPAddress(remoteIpAddress);
 
             context.LogDebug(
-                nameof(IPAddressRule),
+                typeof(IPAddressRule),
                 isAllowed,
                 isAllowed
                 ? $"it matched '{ip}'"
