@@ -62,7 +62,7 @@ namespace Firewall
                 var isAllowed = _allowedCountries.Contains(countryCode);
 
                 context.LogDebug(
-                    nameof(CountryRule),
+                    typeof(CountryRule),
                     isAllowed,
                     "it originated in '{country}'",
                     result.Country.Name);
@@ -72,7 +72,7 @@ namespace Firewall
             catch (AddressNotFoundException)
             {
                 context.LogDebug(
-                    nameof(CountryRule),
+                    typeof(CountryRule),
                     false,
                     "it couldn't be verified against the current GeoIP2 database.");
 

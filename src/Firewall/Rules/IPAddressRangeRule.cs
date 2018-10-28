@@ -32,7 +32,7 @@ namespace Firewall
             var (isAllowed, cidr) = MatchesAnyIPAddressRange(remoteIpAddress);
 
             context.LogDebug(
-                nameof(IPAddressRangeRule),
+                typeof(IPAddressRangeRule),
                 isAllowed,
                 isAllowed
                     ? $"it belongs to '{cidr}' address range"

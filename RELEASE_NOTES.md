@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+## 2.1.1
+
+#### Bug fixes
+
+- Fixed a minor issue where some log information was missing when debug logging was enabled.
+
 ## 2.1.0
 
 #### New features
