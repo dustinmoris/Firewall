@@ -18,6 +18,7 @@ namespace Firewall
         private readonly RequestDelegate _next;
         private readonly IFirewallRule _ruleEngine;
         private readonly ILogger _logger;
+        private readonly RequestDelegate _accessDeniedDelegate;
 
         /// <summary>
         /// Instantiates a new object of type <see cref="FirewallMiddleware"/>.
@@ -33,6 +34,21 @@ namespace Firewall
         }
 
         /// <summary>
+        /// Instantiates a new object of type <see cref="FirewallMiddleware"/>.
+        /// </summary>
+        public FirewallMiddleware(
+            RequestDelegate next,
+            IFirewallRule ruleEngine,
+            RequestDelegate accessDeniedDelegate,
+            ILogger<FirewallMiddleware> logger)
+        {
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
+            _accessDeniedDelegate = accessDeniedDelegate ?? DefaultAccessDeniedDelegate;
+            _logger = logger;
+        }
+
+        /// <summary>
         /// Filters an incoming HTTP request based on the configured rules engine.
         /// </summary>
         public Task Invoke (HttpContext context)
@@ -41,6 +57,12 @@ namespace Firewall
                 _ruleEngine.IsAllowed(context)
                 ? _next.Invoke(context)
                 : DenyAccess(context);
+        }
+
+        private Task DefaultAccessDeniedDelegate(HttpContext context)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return context.Response.WriteAsync("You're not authorized to access this resource.");
         }
 
         private Task DenyAccess(HttpContext context)
@@ -52,8 +74,7 @@ namespace Firewall
                 context.Connection.RemoteIpAddress,
                 context.Request.GetEncodedUrl());
 
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return context.Response.WriteAsync("You're not authorized to access this resource.");
+            return _accessDeniedDelegate(context);
         }
     }
 }
