@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Firewall
@@ -17,6 +18,7 @@ namespace Firewall
         private readonly RequestDelegate _next;
         private readonly IFirewallRule _ruleEngine;
         private readonly ILogger _logger;
+        private readonly RequestDelegate _accessDeniedDelegate;
 
         /// <summary>
         /// Instantiates a new object of type <see cref="FirewallMiddleware"/>.
@@ -28,6 +30,22 @@ namespace Firewall
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
+            _accessDeniedDelegate = DefaultAccessDeniedDelegate;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Instantiates a new object of type <see cref="FirewallMiddleware"/>.
+        /// </summary>
+        public FirewallMiddleware(
+            RequestDelegate next,
+            IFirewallRule ruleEngine,
+            RequestDelegate accessDeniedDelegate,
+            ILogger<FirewallMiddleware> logger)
+        {
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
+            _accessDeniedDelegate = accessDeniedDelegate ?? DefaultAccessDeniedDelegate;
             _logger = logger;
         }
 
@@ -42,16 +60,22 @@ namespace Firewall
                 : DenyAccess(context);
         }
 
-        private Task DenyAccess(HttpContext context)
+        private Task DefaultAccessDeniedDelegate(HttpContext context)
         {
-            if (_logger != null)
-                _logger.LogWarning(
-                    "Firewall: Unauthorized access from IP Address '{address}' trying to reach '{path}' has been blocked.",
-                    context.Connection.RemoteIpAddress,
-                    context.Request.Path); //ToDo
-
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return context.Response.WriteAsync("You're not authorized to access this resource.");
+        }
+
+        private Task DenyAccess(HttpContext context)
+        {
+            context.Log(
+                LogLevel.Warning,
+                typeof(FirewallMiddleware),
+                "Unauthorized access from IP Address '{ipAddress}' trying to reach '{requestPath}' has been blocked.",
+                context.Connection.RemoteIpAddress,
+                context.Request.GetEncodedUrl());
+
+            return _accessDeniedDelegate(context);
         }
     }
 }

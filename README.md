@@ -21,6 +21,7 @@ Firewall adds IP address-, geo-location and custom filtering capabilities to an 
     - [Cloudflare Support](#cloudflare-support)
     - [Custom Rules](#custom-rules)
     - [Custom Filter Rules](#custom-filter-rules)
+    - [Custom RequestDelegate for blocked requests](#custom-requestdelegate-for-blocked-requests)
     - [Miscellaneous](#miscellaneous)
         - [IP Address and CIDR Notation Parsing](#ip-address-and-cidr-notation-parsing)
         - [X-Forwarded-For HTTP Header](#x-forwarded-for-http-header)
@@ -289,6 +290,23 @@ app.UseFirewall(
         .DenyAllAccess()
         .ExceptFromCloudflare()
         .ExceptWhen(ctx => ctx.Connection.RemoteIpAddress == adminIP));
+```
+
+### Custom RequestDelegate for blocked requests
+
+By default the Firewall middleware will return a `403 Forbidden` plain text HTTP response for blocked requests. The (optional) `accessDeniedDelegate` parameter of the `UseFirewall` extension method can be used to override the default behaviour:
+
+```csharp
+app.UseFirewall(
+    FirewallRulesEngine
+        .DenyAllAccess()
+        .ExceptFromCloudflare(),
+    accessDeniedDelegate:
+        ctx =>
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return ctx.Response.WriteAsync("Forbidden");
+        });
 ```
 
 ### Miscellaneous

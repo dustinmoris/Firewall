@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- General -->
     <AssemblyName>Firewall</AssemblyName>
-    <Version>2.1.1</Version>
+    <Version>2.2.0</Version>
     <Description>An ASP.NET Core middleware for request filtering.</Description>
     <Copyright>Copyright 2018 Dustin Moris Gorski</Copyright>
     <Authors>Dustin Moris Gorski and contributors</Authors>
@@ -36,6 +36,7 @@
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.*" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.1.*" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.*" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
     <PackageReference Include="MaxMind.GeoIP2" Version="3.0.*" />

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace Firewall
 {
@@ -17,8 +18,11 @@ namespace Firewall
         /// </summary>
         /// <param name="builder">The application builder which is used to register all ASP.NET Core middleware.</param>
         /// <param name="rulesEngine">The Firewall rules which should be used for request filtering.</param>
+        /// <param name="accessDeniedDelegate">An optional <see cref="RequestDelegate"/> for blocked requests..</param>
         public static IApplicationBuilder UseFirewall(
-            this IApplicationBuilder builder, IFirewallRule rulesEngine) =>
-                builder.UseMiddleware<FirewallMiddleware>(rulesEngine);
+            this IApplicationBuilder builder,
+            IFirewallRule rulesEngine,
+            RequestDelegate accessDeniedDelegate = null) =>
+                builder.UseMiddleware<FirewallMiddleware>(rulesEngine, accessDeniedDelegate);
     }
 }
