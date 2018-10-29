@@ -48,7 +48,13 @@ namespace BasicApp
                     .ExceptFromIPAddressRanges(allowedIPAddressRanges)
                     .ExceptFromIPAddresses(allowedIPAddresses)
                     .ExceptFromCloudflare()
-                    .ExceptFromLocalhost());
+                    .ExceptFromLocalhost(),
+                accessDeniedDelegate:
+                    ctx =>
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return ctx.Response.WriteAsync("Forbidden");
+                    });
 
             app.Run(async (context) =>
             {

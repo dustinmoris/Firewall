@@ -30,6 +30,7 @@ namespace Firewall
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _ruleEngine = ruleEngine ?? throw new ArgumentNullException(nameof(ruleEngine));
+            _accessDeniedDelegate = DefaultAccessDeniedDelegate;
             _logger = logger;
         }
 
