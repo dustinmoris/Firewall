@@ -64,7 +64,7 @@ namespace Firewall
                 context.LogDebug(
                     typeof(CountryRule),
                     isAllowed,
-                    "it originated in '{country}'",
+                    "it originated in '{countryName}'",
                     result.Country.Name);
 
                 return isAllowed || _nextRule.IsAllowed(context);

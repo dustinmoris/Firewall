@@ -34,8 +34,9 @@ namespace Firewall
                 typeof(IPAddressRule),
                 isAllowed,
                 isAllowed
-                ? $"it matched '{ip}'"
-                : "it didn't match any known IP address");
+                    ? "it matched '{ipAddress}'"
+                    : "it didn't match any known IP address",
+                ip);
 
             return isAllowed || _nextRule.IsAllowed(context);
         }

@@ -19,6 +19,24 @@ namespace Firewall
             return result;
         }
 
+        internal static void Log(
+            this HttpContext context,
+            LogLevel logLevel,
+            Type type,
+            string message,
+            params object[] args)
+        {
+            var logger = context.GetLogger();
+
+            if (logger == null || !logger.IsEnabled(logLevel))
+                return;
+
+            logger.Log(
+                logLevel,
+                $"{{type}}: {message}",
+                (new[] { type }).Concat(args));
+        }
+
         internal static void LogDebug(
             this HttpContext context,
             Type type,
@@ -26,22 +44,18 @@ namespace Firewall
             string reason,
             params object[] args)
         {
-            var logger = context.GetLogger();
+            var args0 =
+                new object []
+                {
+                    context.Connection.RemoteIpAddress,
+                    isGranted ? "granted" : "denied"
+                };
 
-            if (logger != null && logger.IsEnabled(LogLevel.Debug))
-            {
-                var args0 =
-                    new object []
-                    {
-                        type,
-                        context.Connection.RemoteIpAddress,
-                        isGranted ? "granted" : "denied"
-                    };
-
-                logger.LogDebug(
-                    $"{{type}}: Remote IP Address '{{ip}}' has been {{result}} access, because {reason}.",
-                    args0.Concat(args));
-            }
+            context.Log(
+                LogLevel.Debug,
+                type,
+                $"Remote IP Address '{{ipAddress}}' has been {{firewallResult}} access, because {reason}.",
+                args0.Concat(args));
         }
     }
 }

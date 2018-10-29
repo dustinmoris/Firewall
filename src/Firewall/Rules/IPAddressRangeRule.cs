@@ -35,8 +35,9 @@ namespace Firewall
                 typeof(IPAddressRangeRule),
                 isAllowed,
                 isAllowed
-                    ? $"it belongs to '{cidr}' address range"
-                    : "it didn't belong to any known address range");
+                    ? "it belongs to '{cidr}' address range"
+                    : "it didn't belong to any known address range",
+                cidr);
 
             return isAllowed || _nextRule.IsAllowed(context);
         }

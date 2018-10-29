@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Firewall
@@ -44,11 +45,12 @@ namespace Firewall
 
         private Task DenyAccess(HttpContext context)
         {
-            if (_logger != null)
-                _logger.LogWarning(
-                    "Firewall: Unauthorized access from IP Address '{address}' trying to reach '{path}' has been blocked.",
-                    context.Connection.RemoteIpAddress,
-                    context.Request.Path); //ToDo
+            context.Log(
+                LogLevel.Warning,
+                typeof(FirewallMiddleware),
+                "Unauthorized access from IP Address '{ipAddress}' trying to reach '{requestPath}' has been blocked.",
+                context.Connection.RemoteIpAddress,
+                context.Request.GetEncodedUrl());
 
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return context.Response.WriteAsync("You're not authorized to access this resource.");
