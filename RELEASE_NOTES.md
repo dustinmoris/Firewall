@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+## 2.2.0
+
+#### New features
+
+- A custom `RequestDelegate` object can be configured for blocked requests.
+- Fixed a typos in log messages.
+
 ## 2.1.1
 
 #### Bug fixes
