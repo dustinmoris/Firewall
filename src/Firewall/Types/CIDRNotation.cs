@@ -27,12 +27,12 @@ namespace Firewall
             var parts = cidrNotation.Split('/');
 
             if (parts.Length != 2)
-                throw new ArgumentException($"Invlaid CIDR notation: {cidrNotation}.");
+                throw new ArgumentException($"Invalid CIDR notation: {cidrNotation}.");
 
             var isValid = IPAddress.TryParse(parts[0], out var address);
 
             if (!isValid)
-                throw new ArgumentException($"Invlaid address in CIDR notation: {cidrNotation}.");
+                throw new ArgumentException($"Invalid address in CIDR notation: {cidrNotation}.");
 
             var maskBits = Convert.ToInt32(parts[1], 10);
             var maxMaskBit = address.AddressFamily == AddressFamily.InterNetwork ? 32 : 128;
