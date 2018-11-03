@@ -22,7 +22,18 @@ namespace Firewall
         public static IApplicationBuilder UseFirewall(
             this IApplicationBuilder builder,
             IFirewallRule rulesEngine,
-            RequestDelegate accessDeniedDelegate = null) =>
+            RequestDelegate accessDeniedDelegate) =>
                 builder.UseMiddleware<FirewallMiddleware>(rulesEngine, accessDeniedDelegate);
+
+        /// <summary>
+        /// Adds the <see cref="FirewallMiddleware"/> to the ASP.NET Core pipeline.
+        /// <para>The Firewall should be registered after global error handling and before any other middleware.</para>
+        /// </summary>
+        /// <param name="builder">The application builder which is used to register all ASP.NET Core middleware.</param>
+        /// <param name="rulesEngine">The Firewall rules which should be used for request filtering.</param>
+        public static IApplicationBuilder UseFirewall(
+            this IApplicationBuilder builder,
+            IFirewallRule rulesEngine) =>
+                builder.UseMiddleware<FirewallMiddleware>(rulesEngine);
     }
 }

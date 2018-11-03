@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- General -->
     <AssemblyName>Firewall</AssemblyName>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <Description>An ASP.NET Core middleware for request filtering.</Description>
     <Copyright>Copyright 2018 Dustin Moris Gorski</Copyright>
     <Authors>Dustin Moris Gorski and contributors</Authors>

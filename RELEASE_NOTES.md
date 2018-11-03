@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+## 2.2.1
+
+#### Bug fixes
+
+- Fixed a bug where `UseFirewall` crashed when no value has been provided for `accessDeniedDelegate`.
+
 ## 2.2.0
 
 #### New features
