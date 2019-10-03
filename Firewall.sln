@@ -1,0 +1,104 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F3829545-1C10-4C54-AA98-AAA1A802C559}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{47752935-1BAE-4F98-BE10-B0CD9BEAF86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firewall", "src\Firewall\Firewall.csproj", "{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firewall.Tests", "tests\Firewall.Tests\Firewall.Tests.csproj", "{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A800153B-32EC-4735-8936-496D106F1C0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicApp", "samples\BasicApp\BasicApp.csproj", "{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".docs", ".docs", "{9DE1C798-3ABC-47ED-9BC0-17BEDFA97D3F}"
+ProjectSection(SolutionItems) = preProject
+	firewall.png = firewall.png
+	firewall.svg = firewall.svg
+	LICENSE = LICENSE
+	README.md = README.md
+	RELEASE_NOTES.md = RELEASE_NOTES.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{5B8A7D75-9C1C-478D-ABBF-0D7D20A8BF1D}"
+ProjectSection(SolutionItems) = preProject
+	appveyor.yml = appveyor.yml
+	build.ps1 = build.ps1
+	build.sh = build.sh
+	global.json = global.json
+	NuGet.config = NuGet.config
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".git", ".git", "{205DBFFC-DFC7-4EDB-A420-9966DF9547E7}"
+ProjectSection(SolutionItems) = preProject
+	.gitattributes = .gitattributes
+	.gitignore = .gitignore
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".psscripts", ".psscripts", "{AA0E1A5A-34A7-4DBF-9871-EAABC2EC1C41}"
+ProjectSection(SolutionItems) = preProject
+	.psscripts\build-functions.ps1 = .psscripts\build-functions.ps1
+	.psscripts\install-dotnet.ps1 = .psscripts\install-dotnet.ps1
+	.psscripts\nuget-updates.ps1 = .psscripts\nuget-updates.ps1
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A} = {F3829545-1C10-4C54-AA98-AAA1A802C559}
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1} = {47752935-1BAE-4F98-BE10-B0CD9BEAF86D}
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702} = {A800153B-32EC-4735-8936-496D106F1C0F}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|x64.Build.0 = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Debug|x86.Build.0 = Debug|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|x64.ActiveCfg = Release|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|x64.Build.0 = Release|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|x86.ActiveCfg = Release|Any CPU
+		{A81ECC21-B451-4F08-BAC8-21ABDEB1861A}.Release|x86.Build.0 = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|x64.Build.0 = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Debug|x86.Build.0 = Debug|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|x64.ActiveCfg = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|x64.Build.0 = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|x86.ActiveCfg = Release|Any CPU
+		{8AC40E37-10FD-41CC-B9E4-92A52AEE1DF1}.Release|x86.Build.0 = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|x64.Build.0 = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Debug|x86.Build.0 = Debug|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|x64.ActiveCfg = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|x64.Build.0 = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|x86.ActiveCfg = Release|Any CPU
+		{FBFB21DA-F96B-4B83-9873-4DCEAB39A702}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

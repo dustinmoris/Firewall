@@ -384,7 +384,9 @@ public class Startup
 
 ### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Debug` and retrieve more diagnostics:
+Firewall logs all denied requests using ASP.NET Core's logging API with log level `Warning`.
+
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall and for which reasons then you can turn up the log level to `Debug` and retrieve more detailed diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,
