@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+## 3.0.0
+
+- Upgraded to .NET 5 and removed support for all other target frameworks.
+
+.NET 5 is the progression of .NET Core as well as .NET Framework and Firewall will not support outdated frameworks after this version anymore. Please upgrade projects to .NET 5 in order to use Firewall. If this is not immediately possible then you can keep using Firewall 2.2.1 until the migration has happened.
+
 ## 2.2.1
 
 #### Bug fixes

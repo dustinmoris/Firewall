@@ -331,3 +331,4 @@ ASALocalRun/
 
 # macOS
 .DS_Store
+.ionide

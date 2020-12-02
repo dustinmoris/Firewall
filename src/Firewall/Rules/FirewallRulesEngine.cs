@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Firewall
 {
+
     /// <summary>
     /// Rules engine to configure Firewall rules for request filtering.
     /// </summary>
