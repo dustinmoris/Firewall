@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicApp", "samples\BasicAp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".docs", ".docs", "{9DE1C798-3ABC-47ED-9BC0-17BEDFA97D3F}"
 ProjectSection(SolutionItems) = preProject
-	firewall.png = firewall.png
-	firewall.svg = firewall.svg
 	LICENSE = LICENSE
 	README.md = README.md
 	RELEASE_NOTES.md = RELEASE_NOTES.md
