@@ -71,14 +71,12 @@ namespace Firewall
                 index++;
             }
 
-            if (bits > 0)
-            {
-                var mask = (byte)~(255 >> bits);
-                if ((address[index] & mask) != (cidr[index] & mask))
-                    return false;
-            }
+            if (bits <= 0)
+                return true;
 
-            return true;
+            var mask = (byte)~(255 >> bits);
+
+            return (address[index] & mask) == (cidr[index] & mask);
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Firewall
 {
     /// <summary>
-    /// An ASP.NET Core middlware for request filtering.
+    /// An ASP.NET Core middleware for request filtering.
     /// <para>Firewall can allow/deny access to a connection based on a range of different rules, such as IP address filtering, CIDR notation filtering or geo-location settings.</para>
     /// <para>Use the <see cref="FirewallRulesEngine"/> class to configure the Firewall rules.</para>
     /// </summary>

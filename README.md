@@ -6,10 +6,7 @@ Firewall adds IP address-, geo-location and custom filtering capabilities to an 
 
 [![NuGet Info](https://buildstats.info/nuget/Firewall?includePreReleases=true)](https://www.nuget.org/packages/Firewall/)
 
-| Windows | Linux |
-| :------ | :---- |
-| [![Build status](https://ci.appveyor.com/api/projects/status/6x0pse65273xp9rw/branch/develop?svg=true)](https://ci.appveyor.com/project/dustinmoris/firewall/branch/develop) | [![Linux Build status](https://travis-ci.org/dustinmoris/Firewall.svg?branch=develop)](https://travis-ci.org/dustinmoris/Firewall/builds?branch=develop) |
-| [![Windows Build history](https://buildstats.info/appveyor/chart/dustinmoris/Firewall?branch=develop&includeBuildsFromPullRequest=false)](https://ci.appveyor.com/project/dustinmoris/Firewall/history?branch=develop) | [![Linux Build history](https://buildstats.info/travisci/chart/dustinmoris/Firewall?branch=develop&includeBuildsFromPullRequest=false)](https://travis-ci.org/dustinmoris/Firewall/builds?branch=develop) |
+[![Build History](https://buildstats.info/github/chart/dustinmoris/Firewall?branch=develop)](https://github.com/dustinmoris/Firewall/actions?query=branch%3Adevelop)
 
 ## Table of contents
 
@@ -384,7 +381,9 @@ public class Startup
 
 ### Diagnostics
 
-If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall then you can turn up the log level to `Debug` and retrieve more diagnostics:
+Firewall logs all denied requests using ASP.NET Core's logging API with log level `Warning`.
+
+If you're having troubles with Firewall and you want to get more insight into which requests are being blocked by the Firewall and for which reasons then you can turn up the log level to `Debug` and retrieve more detailed diagnostics:
 
 ```csharp
 // In this example Serilog is used to log to the console,

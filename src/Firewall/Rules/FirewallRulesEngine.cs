@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Firewall
 {
+
     /// <summary>
     /// Rules engine to configure Firewall rules for request filtering.
     /// </summary>
@@ -15,38 +16,30 @@ namespace Firewall
         /// Configures the Firewall to deny all access.
         /// <para>Use this as the base rule before configuring other rules.</para>
         /// </summary>
-        public static IFirewallRule DenyAllAccess()
-        {
-            return new DenyAllRule();
-        }
+        public static IFirewallRule DenyAllAccess() =>
+            new DenyAllRule();
 
         /// <summary>
         /// Configures the Firewall to allow requests from localhost.
         /// </summary>
-        public static IFirewallRule ExceptFromLocalhost(this IFirewallRule rule)
-        {
-            return new LocalhostRule(rule);
-        }
+        public static IFirewallRule ExceptFromLocalhost(this IFirewallRule rule) =>
+            new LocalhostRule(rule);
 
         /// <summary>
         /// Configures the Firewall to allow requests from specific IP addresses.
         /// </summary>
         public static IFirewallRule ExceptFromIPAddresses(
             this IFirewallRule rule,
-            IList<IPAddress> ipAddresses)
-        {
-            return new IPAddressRule(rule, ipAddresses);
-        }
+            IList<IPAddress> ipAddresses) =>
+            new IPAddressRule(rule, ipAddresses);
 
         /// <summary>
         /// Configures the Firewall to allow requests from IP addresses which belong to a list of specific IP address ranges.
         /// </summary>
         public static IFirewallRule ExceptFromIPAddressRanges(
             this IFirewallRule rule,
-            IList<CIDRNotation> cidrNotations)
-        {
-            return new IPAddressRangeRule(rule, cidrNotations);
-        }
+            IList<CIDRNotation> cidrNotations) =>
+            new IPAddressRangeRule(rule, cidrNotations);
 
         /// <summary>
         /// Configures the Firewall to allow requests from IP addresses which belong to Cloudflare.
@@ -70,19 +63,15 @@ namespace Firewall
         /// </summary>
         public static IFirewallRule ExceptFromCountries(
             this IFirewallRule rule,
-            IList<CountryCode> countries)
-        {
-            return new CountryRule(rule, countries);
-        }
+            IList<CountryCode> countries) =>
+            new CountryRule(rule, countries);
 
         /// <summary>
         /// Configures the Firewall to allow requests which satisfy a custom <paramref name="filter"/>.
         /// </summary>
         public static IFirewallRule ExceptWhen(
             this IFirewallRule rule,
-            Func<HttpContext, bool> filter)
-        {
-            return new CustomRule(rule, filter);
-        }
+            Func<HttpContext, bool> filter) =>
+            new CustomRule(rule, filter);
     }
 }

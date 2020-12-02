@@ -3,25 +3,26 @@
   <PropertyGroup>
     <!-- General -->
     <AssemblyName>Firewall</AssemblyName>
-    <Version>2.2.1</Version>
+    <Version>3.0.0</Version>
     <Description>An ASP.NET Core middleware for request filtering.</Description>
-    <Copyright>Copyright 2018 Dustin Moris Gorski</Copyright>
+    <Copyright>Copyright 2020 Dustin Moris Gorski</Copyright>
     <Authors>Dustin Moris Gorski and contributors</Authors>
     <NeutralLanguage>en-GB</NeutralLanguage>
 
     <!-- Build settings -->
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
 
     <!-- NuGet settings -->
     <PackageId>Firewall</PackageId>
     <PackageTags>Firewall;IP Address;Filter;Security;ASP.NET Core</PackageTags>
     <PackageReleaseNotes>https://raw.githubusercontent.com/dustinmoris/Firewall/master/RELEASE_NOTES.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/dustinmoris/Firewall/master/firewall.png</PackageIconUrl>
+    <PackageIcon>firewall.png</PackageIcon>
     <PackageProjectUrl>https://github.com/dustinmoris/Firewall</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/dustinmoris/Firewall/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dustinmoris/Firewall</RepositoryUrl>
@@ -34,12 +35,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+        <None Include="../../assets/firewall.png">
+            <Pack>true</Pack>
+            <PackagePath>$(PackageIconUrl)</PackagePath>
+        </None>
+    </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.1.*" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.*" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-    <PackageReference Include="MaxMind.GeoIP2" Version="3.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.*" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="MaxMind.GeoIP2" Version="4.0.*" />
   </ItemGroup>
 
   <ItemGroup>
