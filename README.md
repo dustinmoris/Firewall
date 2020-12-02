@@ -1,4 +1,4 @@
-# ![Firewall](https://raw.githubusercontent.com/dustinmoris/Firewall/master/firewall.png) Firewall
+# ![Firewall](https://raw.githubusercontent.com/dustinmoris/Firewall/master/assets/firewall.png) Firewall
 
 ASP.NET Core middleware for request filtering.
 
