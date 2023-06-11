@@ -30,16 +30,18 @@ namespace Firewall
         /// </summary>
         public static IFirewallRule ExceptFromIPAddresses(
             this IFirewallRule rule,
-            IList<IPAddress> ipAddresses) =>
-            new IPAddressRule(rule, ipAddresses);
+            IList<IPAddress> ipAddresses,
+            bool proxyAware = false) =>
+            new IPAddressRule(rule, ipAddresses, proxyAware);
 
         /// <summary>
         /// Configures the Firewall to allow requests from IP addresses which belong to a list of specific IP address ranges.
         /// </summary>
         public static IFirewallRule ExceptFromIPAddressRanges(
             this IFirewallRule rule,
-            IList<CIDRNotation> cidrNotations) =>
-            new IPAddressRangeRule(rule, cidrNotations);
+            IList<CIDRNotation> cidrNotations,
+            bool proxyAware = false) =>
+            new IPAddressRangeRule(rule, cidrNotations, proxyAware);
 
         /// <summary>
         /// Configures the Firewall to allow requests from IP addresses which belong to Cloudflare.
@@ -63,8 +65,9 @@ namespace Firewall
         /// </summary>
         public static IFirewallRule ExceptFromCountries(
             this IFirewallRule rule,
-            IList<CountryCode> countries) =>
-            new CountryRule(rule, countries);
+            IList<CountryCode> countries, 
+            bool proxyAware = false) =>
+            new CountryRule(rule, countries, proxyAware: proxyAware);
 
         /// <summary>
         /// Configures the Firewall to allow requests which satisfy a custom <paramref name="filter"/>.

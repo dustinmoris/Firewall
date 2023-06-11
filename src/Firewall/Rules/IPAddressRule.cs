@@ -12,14 +12,16 @@ namespace Firewall
     {
         private readonly IFirewallRule _nextRule;
         private readonly IList<IPAddress> _ipAddresses;
+        private readonly bool _proxyAware;
 
         /// <summary>
         /// Initialises a new instance of <see cref="IPAddressRule"/>.
         /// </summary>
-        public IPAddressRule(IFirewallRule nextRule, IList<IPAddress> ipAddresses)
+        public IPAddressRule(IFirewallRule nextRule, IList<IPAddress> ipAddresses, bool proxyAware = false)
         {
             _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
             _ipAddresses = ipAddresses ?? throw new ArgumentNullException(nameof(ipAddresses));
+            _proxyAware = proxyAware;
         }
 
         /// <summary>
@@ -27,7 +29,7 @@ namespace Firewall
         /// </summary>
         public bool IsAllowed(HttpContext context)
         {
-            var remoteIpAddress = context.Connection.RemoteIpAddress;
+	        var remoteIpAddress = context.GetRemoteOrProxy(_proxyAware);
             var (isAllowed, ip) = MatchesAnyIPAddress(remoteIpAddress);
 
             context.LogDebug(
