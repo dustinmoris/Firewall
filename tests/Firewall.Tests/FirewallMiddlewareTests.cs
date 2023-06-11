@@ -4,14 +4,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 using Firewall;
+using Microsoft.Extensions.Primitives;
 
 public class FirewallMiddlewareTests
 {
-    [Fact]
-    public async Task Firewall_With_Single_VIP_And_Request_With_Valid_IP_Returns_Ok()
+    [Theory]
+    [InlineData("12.34.56.78", "127.0.0.1", "12.34.56.78", false, true)]
+    [InlineData("127.0.0.1", "12.34.56.78", "12.34.56.78", true, true)]
+    [InlineData("10.99.99.99", "127.0.0.1", "12.34.56.78", false, false)]
+    [InlineData("127.0.0.1", "10.99.99.99", "12.34.56.78", true, false)]
+	public async Task Firewall_With_Single_VIP(
+	    string remoteAddress, string xForwardedFor, string allowedAddress, bool proxyAware, bool success)
     {
         var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("12.34.56.78");
+        var allowedIpAddress = IPAddress.Parse(allowedAddress);
         var allowedIpAddresses = new List<IPAddress> { allowedIpAddress };
 
         var firewall = new FirewallMiddleware(
@@ -22,49 +28,36 @@ public class FirewallMiddlewareTests
                 },
             FirewallRulesEngine
                 .DenyAllAccess()
-                .ExceptFromIPAddresses(allowedIpAddresses),
+                .ExceptFromIPAddresses(allowedIpAddresses, proxyAware),
             logger: null);
 
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = allowedIpAddress;
+        var httpContext = new DefaultHttpContext
+        {
+	        Request =
+	        {
+		        Headers = { new KeyValuePair<string, StringValues>("x-forwarded-for", xForwardedFor) }
+	        },
+	        Connection =
+	        {
+		        RemoteIpAddress = IPAddress.Parse(remoteAddress)
+			}
+        };
 
-        await firewall.Invoke(httpContext);
+		await firewall.Invoke(httpContext);
 
-        Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
-        Assert.True(isSuccess);
-    }
+		Assert.Equal(success ? StatusCodes.Status200OK : StatusCodes.Status403Forbidden, httpContext.Response.StatusCode);
+		Assert.Equal(success, isSuccess);
+	}
 
-    [Fact]
-    public async Task Firewall_With_Single_VIP_And_Request_With_Invalid_IP_Returns_AccessDenied()
+	[Theory]
+	[InlineData("174.74.115.197", "192.168.1.1", false, true)]
+	[InlineData("192.168.1.1", "174.74.115.197", true, true)]
+	[InlineData("174.74.115.210", "192.168.1.1", false, false)]
+	[InlineData("192.168.1.1", "174.74.115.210", true, false)]
+	public async Task Firewall_With_Single_CIDR(
+		string remoteAddress, string xForwardedFor, bool proxyAware, bool success)
     {
         var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("12.34.56.78");
-        var allowedIpAddresses = new List<IPAddress> { allowedIpAddress };
-        var firewall = new FirewallMiddleware(
-            async (innerCtx) =>
-                {
-                    isSuccess = true;
-                    await innerCtx.Response.WriteAsync("Success!");
-                },
-            FirewallRulesEngine
-                .DenyAllAccess()
-                .ExceptFromIPAddresses(allowedIpAddresses),
-            logger: null);
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = IPAddress.Parse("10.99.99.99");
-
-        await firewall.Invoke(httpContext);
-
-        Assert.Equal(StatusCodes.Status403Forbidden, httpContext.Response.StatusCode);
-        Assert.False(isSuccess);
-    }
-
-    [Fact]
-    public async Task Firewall_With_Single_CIDR_And_Request_With_Valid_IP_Returns_Ok()
-    {
-        var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("174.74.115.197");
         var cidrNotations = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
         var firewall = new FirewallMiddleware(
             async (innerCtx) =>
@@ -74,43 +67,27 @@ public class FirewallMiddlewareTests
                 },
             FirewallRulesEngine
                 .DenyAllAccess()
-                .ExceptFromIPAddressRanges(cidrNotations),
+                .ExceptFromIPAddressRanges(cidrNotations, proxyAware),
             logger: null);
 
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = allowedIpAddress;
+        var httpContext = new DefaultHttpContext
+        {
+	        Request =
+	        {
+		        Headers = { new KeyValuePair<string, StringValues>("x-forwarded-for", xForwardedFor) }
+	        },
+	        Connection =
+	        {
+		        RemoteIpAddress = IPAddress.Parse(remoteAddress)
+			}
+        };
 
-        await firewall.Invoke(httpContext);
+		await firewall.Invoke(httpContext);
 
-        Assert.Equal(StatusCodes.Status200OK, httpContext.Response.StatusCode);
-        Assert.True(isSuccess);
+		Assert.Equal(success ? StatusCodes.Status200OK : StatusCodes.Status403Forbidden, httpContext.Response.StatusCode);
+        Assert.Equal(success, isSuccess);
     }
 
-    [Fact]
-    public async Task Firewall_With_Single_CIDR_And_Request_With_Invalid_IP_Returns_AccessDenied()
-    {
-        var isSuccess = false;
-        var allowedIpAddress = IPAddress.Parse("174.74.115.210");
-        var cidrNotations = new List<CIDRNotation> { CIDRNotation.Parse("174.74.115.192/28") };
-        var firewall = new FirewallMiddleware(
-            async (innerCtx) =>
-                {
-                    isSuccess = true;
-                    await innerCtx.Response.WriteAsync("Success!");
-                },
-            FirewallRulesEngine
-                .DenyAllAccess()
-                .ExceptFromIPAddressRanges(cidrNotations),
-            logger: null);
-
-        var httpContext = new DefaultHttpContext();
-        httpContext.Connection.RemoteIpAddress = allowedIpAddress;
-
-        await firewall.Invoke(httpContext);
-
-        Assert.Equal(StatusCodes.Status403Forbidden, httpContext.Response.StatusCode);
-        Assert.False(isSuccess);
-    }
 
     [Theory]
     [InlineData("1.2.3.4")]

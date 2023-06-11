@@ -17,14 +17,16 @@ namespace Firewall
         private readonly IFirewallRule _nextRule;
         private readonly IList<string> _allowedCountries;
         private readonly DatabaseReader _databaseReader;
+		private readonly bool _proxyAware;
 
-        /// <summary>
-        /// Initialises a new instance of <see cref="CountryRule"/>.
-        /// </summary>
-        public CountryRule(
+		/// <summary>
+		/// Initialises a new instance of <see cref="CountryRule"/>.
+		/// </summary>
+		public CountryRule(
             IFirewallRule nextRule,
             IList<CountryCode> allowedCountries,
-            string geoIP2FileName = null)
+            string geoIP2FileName = null,
+            bool proxyAware = false)
         {
             _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
             if (allowedCountries == null)
@@ -44,6 +46,7 @@ namespace Firewall
                         "Firewall.GeoIP2.GeoLite2-Country.mmdb");
 
             _databaseReader = new DatabaseReader(stream);
+            _proxyAware = proxyAware;
         }
 
         /// <summary>
@@ -53,7 +56,7 @@ namespace Firewall
         {
             try
             {
-                var remoteIpAddress = context.Connection.RemoteIpAddress;
+	            var remoteIpAddress = context.GetRemoteOrProxy(_proxyAware);
                 var result = _databaseReader.Country(remoteIpAddress);
                 var countryCode = result.Country.IsoCode;
 

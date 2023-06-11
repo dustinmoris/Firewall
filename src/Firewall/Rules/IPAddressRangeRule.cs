@@ -13,22 +13,24 @@ namespace Firewall
     {
         private readonly IFirewallRule _nextRule;
         private readonly IList<CIDRNotation> _cidrNotations;
+		private readonly bool _proxyAware;
 
-        /// <summary>
-        /// Initialises a new instance of <see cref="IPAddressRangeRule"/>.
-        /// </summary>
-        public IPAddressRangeRule(IFirewallRule nextRule, IList<CIDRNotation> cidrNotations)
+		/// <summary>
+		/// Initialises a new instance of <see cref="IPAddressRangeRule"/>.
+		/// </summary>
+		public IPAddressRangeRule(IFirewallRule nextRule, IList<CIDRNotation> cidrNotations, bool proxyAware = false)
         {
             _nextRule = nextRule ?? throw new ArgumentNullException(nameof(nextRule));
             _cidrNotations = cidrNotations ?? throw new ArgumentNullException(nameof(cidrNotations));
-        }
+            _proxyAware = proxyAware;
+		}
 
         /// <summary>
         /// Denotes whether a given <see cref="HttpContext"/> is permitted to access the web server.
         /// </summary>
         public bool IsAllowed(HttpContext context)
         {
-            var remoteIpAddress = context.Connection.RemoteIpAddress;
+	        var remoteIpAddress = context.GetRemoteOrProxy(_proxyAware);
             var (isAllowed, cidr) = MatchesAnyIPAddressRange(remoteIpAddress);
 
             context.LogDebug(
